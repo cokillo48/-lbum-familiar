@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Álbum Familiar</title>
+    <title>Panel de Administración - Álbum Familiar</title>
     <style>
         /* ESTILOS GLOBALES */
         body {
@@ -19,71 +19,23 @@
 
         h1 {
             color: #4a3b32;
-            margin-bottom: 20px;
+            margin-bottom: 5px;
             text-align: center;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* PANTALLA DE INGRESO (LOGIN) */
-        .login-container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            border: 5px solid #5c4a3c;
-            max-width: 400px;
-            width: 100%;
-            box-sizing: border-box;
-            text-align: center;
-            margin-top: 50px;
-        }
-
-        .login-container h2 {
-            color: #5c4a3c;
-            margin-top: 0;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #7a6b5e;
+        .admin-badge {
+            background-color: #5c4a3c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
             font-weight: bold;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
         }
 
-        .input-group input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #dcdcdc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 1em;
-        }
-
-        .input-group input:focus {
-            border-color: #7a6b5e;
-            outline: none;
-        }
-
-        .error-msg {
-            color: #c94c4c;
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: none;
-        }
-
-        /* CONTENEDOR DEL LIBRO (OCULTO AL INICIO) */
-        .album-content {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-
+        /* CONTENEDOR DEL LIBRO VISTA ADMINISTRADOR (DOS PÁGINAS VISIBLES) */
         .book-container {
             display: flex;
             justify-content: center;
@@ -115,6 +67,7 @@
             border-left: 2px solid #dcdcdc;
         }
 
+        /* MARCO DE LA FOTO */
         .photo-frame {
             width: 100%;
             max-width: 420px;
@@ -127,11 +80,6 @@
             justify-content: center;
             overflow: hidden;
             border-radius: 2px;
-            transition: transform 0.3s;
-        }
-
-        .photo-frame:hover {
-            transform: scale(1.02);
         }
 
         .photo-frame img {
@@ -140,6 +88,7 @@
             object-fit: cover;
         }
 
+        /* TEXTO DE PIE DE PÁGINA */
         .page-number {
             margin-top: 15px;
             font-size: 0.95em;
@@ -147,7 +96,7 @@
             font-weight: bold;
         }
 
-        /* NAVEGACIÓN */
+        /* BOTONES DE NAVEGACIÓN */
         .navigation {
             margin-top: 25px;
             display: flex;
@@ -164,16 +113,12 @@
             cursor: pointer;
             font-size: 1em;
             font-weight: bold;
-            transition: background 0.2s, transform 0.1s;
+            transition: background 0.2s;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .btn:hover {
             background-color: #5c4a3c;
-        }
-
-        .btn:active {
-            transform: scale(0.97);
         }
 
         .btn:disabled {
@@ -190,89 +135,88 @@
             text-align: center;
         }
 
-        .welcome-user {
-            font-style: italic;
-            color: #7a6b5e;
-            margin-bottom: 15px;
+        /* LISTA LATERAL O PANEL DE CONTROL DE FAMILIARES */
+        .family-list {
+            margin-top: 30px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 400px;
+            border-top: 4px solid #7a6b5e;
         }
-    </style>
+
+        .family-list h3 {
+            margin-top: 0;
+            color: #5c4a3c;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .family-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .family-list li {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f9f9f9;
+            color: #4a3b32;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .family-list li::before {
+            content: "👤 ";
+            margin-right: 10px;
+        }
+    </script>
 </head>
 <body>
 
     <h1>📸 Nuestro Álbum Familiar</h1>
+    <div class="admin-badge">VISTA ADMINISTRADOR (JORGE)</div>
 
-    <!-- FORMULARIO DE INGRESO -->
-    <div class="login-container" id="login-box">
-        <h2>Ingresar al Álbum</h2>
-        <p style="color: #7a6b5e; font-size: 0.9em; margin-bottom: 20px;">Por favor introduce tu nombre de usuario para ver los recuerdos familiares.</p>
-        
-        <div class="input-group">
-            <label for="username">Usuario:</label>
-            <input type="text" id="username" placeholder="Ej: Fabiola, Luis, Jorge.S...">
+    <div class="book-container">
+        <div class="sheet">
+            <div class="photo-frame">
+                <img id="img-left" src="foto1.jpg" alt="Foto Izquierda" onerror="this.src='https://via.placeholder.com/420x380?text=Espacio+para+Foto'">
+            </div>
+            <div class="page-number" id="page-num-left">Foto 1</div>
         </div>
-        
-        <div class="error-msg" id="error-message">Usuario no registrado o incorrecto</div>
-        
-        <button class="btn" style="width: 100%;" onclick="validarIngreso()">Entrar</button>
+
+        <div class="sheet sheet-right">
+            <div class="photo-frame">
+                <img id="img-right" src="foto2.jpg" alt="Foto Derecha" onerror="this.src='https://via.placeholder.com/420x380?text=Espacio+para+Foto'">
+            </div>
+            <div class="page-number" id="page-num-right">Foto 2</div>
+        </div>
     </div>
 
-    <!-- CONTENIDO DEL ÁLBUM (OCULTO HASTA LOGUEARSE) -->
-    <div class="album-content" id="album-content">
-        <div class="welcome-user" id="welcome-text">¡Bienvenido de vuelta!</div>
-        
-        <div class="book-container">
-            <!-- LADO IZQUIERDO -->
-            <div class="sheet">
-                <div class="photo-frame">
-                    <img id="img-left" src="foto1.jpg" alt="Foto Izquierda" onerror="this.src='https://via.placeholder.com/420x380?text=Espacio+para+Foto'">
-                </div>
-                <div class="page-number" id="page-num-left">Foto 1</div>
-            </div>
+    <div class="navigation">
+        <button class="btn" id="btn-prev" onclick="navegar(-1)">◀ Anterior</button>
+        <span class="counter" id="sheet-counter">Hoja 1 de 500</span>
+        <button class="btn" id="btn-next" onclick="navegar(1)">Siguiente ▶</button>
+    </div>
 
-            <!-- LADO DERECHO -->
-            <div class="sheet sheet-right">
-                <div class="photo-frame">
-                    <img id="img-right" src="foto2.jpg" alt="Foto Derecha" onerror="this.src='https://via.placeholder.com/420x380?text=Espacio+para+Foto'">
-                </div>
-                <div class="page-number" id="page-num-right">Foto 2</div>
-            </div>
-        </div>
-
-        <!-- CONTROLES INFERIORES -->
-        <div class="navigation">
-            <button class="btn" id="btn-prev" onclick="navegar(-1)">◀ Anterior</button>
-            <span class="counter" id="sheet-counter">Hoja 1 de 500</span>
-            <button class="btn" id="btn-next" onclick="navegar(1)">Siguiente ▶</button>
-        </div>
+    <div class="family-list">
+        <h3>Familiares con Acceso</h3>
+        <ul>
+            <li>Fabiola</li>
+            <li>Luis</li>
+            <li>Jorge.S</li> <li>Hortencia</li>
+            <li>Amelia</li>
+        </ul>
     </div>
 
     <script>
-        // LISTA DE USUARIOS PERMITIDOS (Incluyendo a tu papá Jorge.S)
-        const usuariosPermitidos = ["jorge", "jorge.s", "fabiola", "luis", "hortencia", "amelia"];
-
-        // Configuración de las fotos (1000 fotos = 500 hojas)
-        const TOTAL_FOTOS = 1000; 
-        const TOTAL_HOJAS = 500; 
-        let hojaActual = 1; 
-
-        function validarIngreso() {
-            const inputUser = document.getElementById('username').value.trim().toLowerCase();
-            const errorMsg = document.getElementById('error-message');
-
-            if (usuariosPermitidos.includes(inputUser)) {
-                // Ocultar login y mostrar álbum
-                document.getElementById('login-box').style.display = 'none';
-                document.getElementById('album-content').style.display = 'flex';
-                
-                // Formatear el nombre para el saludo en pantalla
-                let nombreMostrado = inputUser === "jorge.s" ? "Jorge Salomón" : inputUser.charAt(0).toUpperCase() + inputUser.slice(1);
-                document.getElementById('welcome-text').innerText = `¡Hola, qué alegría tenerte aquí ${nombreMostrado}! Disfruta el álbum.`;
-                
-                actualizarAlbum();
-            } else {
-                errorMsg.style.display = 'block';
-            }
-        }
+        // Configuración fija original del álbum
+        const TOTAL_HOJAS = 500; // 1000 fotos distribuidas de a dos por hoja
+        let hojaActual = 1;
 
         function actualizarAlbum() {
             let fotoIzquierda = (hojaActual * 2) - 1;
@@ -284,6 +228,7 @@
             const txtRight = document.getElementById('page-num-right');
             const sheetCounter = document.getElementById('sheet-counter');
 
+            // Carga las fotos correspondientes (foto1.jpg, foto2.jpg, etc.)
             imgLeft.src = `foto${fotoIzquierda}.jpg`;
             imgRight.src = `foto${fotoDerecha}.jpg`;
 
@@ -303,6 +248,9 @@
                 actualizarAlbum();
             }
         }
+
+        // Arrancar el álbum
+        actualizarAlbum();
     </script>
 
 </body>
