@@ -174,14 +174,16 @@
             content: "👤 ";
             margin-right: 10px;
         }
-    </script>
+    </style>
 </head>
 <body>
 
     <h1>📸 Nuestro Álbum Familiar</h1>
     <div class="admin-badge">VISTA ADMINISTRADOR (JORGE)</div>
 
+    <!-- CUERPO DEL ÁLBUM (VISTA LIBRO ABIERTO DE 1000 HOJAS) -->
     <div class="book-container">
+        <!-- LADO IZQUIERDO -->
         <div class="sheet">
             <div class="photo-frame">
                 <img id="img-left" src="foto1.jpg" alt="Foto Izquierda" onerror="this.src='https://via.placeholder.com/420x380?text=Espacio+para+Foto'">
@@ -189,6 +191,7 @@
             <div class="page-number" id="page-num-left">Foto 1</div>
         </div>
 
+        <!-- LADO DERECHO -->
         <div class="sheet sheet-right">
             <div class="photo-frame">
                 <img id="img-right" src="foto2.jpg" alt="Foto Derecha" onerror="this.src='https://via.placeholder.com/420x380?text=Espacio+para+Foto'">
@@ -197,25 +200,28 @@
         </div>
     </div>
 
+    <!-- CONTROLES INFERIORES -->
     <div class="navigation">
         <button class="btn" id="btn-prev" onclick="navegar(-1)">◀ Anterior</button>
-        <span class="counter" id="sheet-counter">Hoja 1 de 500</span>
+        <span class="counter" id="sheet-counter">Hoja 1 de 1000</span>
         <button class="btn" id="btn-next" onclick="navegar(1)">Siguiente ▶</button>
     </div>
 
+    <!-- LISTA DE CONTROL DE FAMILIARES AUTORIZADOS -->
     <div class="family-list">
         <h3>Familiares con Acceso</h3>
         <ul>
             <li>Fabiola</li>
             <li>Luis</li>
-            <li>Jorge.S</li> <li>Hortencia</li>
+            <li>Jorge.S</li> 
+            <li>Hortencia</li>
             <li>Amelia</li>
         </ul>
     </div>
 
     <script>
-        // Configuración fija original del álbum
-        const TOTAL_HOJAS = 500; // 1000 fotos distribuidas de a dos por hoja
+        // Configuración fija del álbum ajustada a 1000 hojas
+        const TOTAL_HOJAS = 1000; 
         let hojaActual = 1;
 
         function actualizarAlbum() {
