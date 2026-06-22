@@ -3,261 +3,935 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - Álbum Familiar</title>
+    <title>Álbum Familiar</title>
     <style>
-        /* ESTILOS GLOBALES */
+        /* ESTILOS GLOBALES - DISEÑO FAMILIAR Y CÁLIDO */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4eae1;
+            font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle, #f5efe6 60%, #e3d5ca 100%);
+            color: #3e3227;
             margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 10px;
             min-height: 100vh;
-        }
-
-        h1 {
-            color: #4a3b32;
-            margin-bottom: 5px;
-            text-align: center;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-
-        .admin-badge {
-            background-color: #5c4a3c;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: bold;
-            margin-bottom: 25px;
-            letter-spacing: 1px;
-        }
-
-        /* CONTENEDOR DEL LIBRO VISTA ADMINISTRADOR (DOS PÁGINAS VISIBLES) */
-        .book-container {
             display: flex;
-            justify-content: center;
-            width: 100%;
-            max-width: 1100px;
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
-            border: 10px solid #5c4a3c;
-            overflow: hidden;
-            position: relative;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            box-sizing: border-box;
         }
 
-        /* CADA HOJA INDIVIDUAL */
-        .sheet {
-            flex: 1;
-            padding: 25px;
+        header {
+            text-align: center;
+            margin: 10px 0 15px 0;
+        }
+
+        header h1 {
+            font-family: 'Georgia', serif;
+            color: #6c4724;
+            margin: 0 0 5px 0;
+            font-size: 24px;
+        }
+
+        header p {
+            margin: 0;
+            color: #8c7355;
+            font-style: italic;
+            font-size: 13px;
+        }
+
+        /* PANTALLA DE LOGEO OBLIGATORIO */
+        .tarjeta-login {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
             box-sizing: border-box;
-            background: linear-gradient(to right, #ffffff 94%, #eaeaea 100%);
+            margin-top: 10vh;
+        }
+
+        .campo-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #c8b9a6;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .btn-ingresar {
+            width: 100%;
+            background-color: #6c4724;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* INTERFAZ DEL PANEL DE CONTROL */
+        .panel-dashboard {
+            width: 100%;
+            max-width: 500px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .encabezado-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .tarjeta-familia {
+            background-color: #ffffff;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border-left: 6px solid #6c4724;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tarjeta-familia:active { transform: scale(0.98); }
+        .tarjeta-familia h3 { margin: 0; font-size: 15px; color: #4a3b2c; }
+        .tarjeta-familia span { font-size: 11px; color: #8c7355; background-color: #f5efe6; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
+        .tarjeta-general { border-left-color: #3b6647; background-color: #f0f7f2; }
+        .tarjeta-general h3 { color: #24422e; }
+        .tarjeta-general span { background-color: #3b6647; color: white; }
+
+        /* SECCIONES DEL ADMINISTRADOR */
+        .seccion-gestion-claves {
+            background-color: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            margin-top: 15px;
+            border: 1px solid #e3d5ca;
+        }
+        .seccion-gestion-claves h4 {
+            margin: 0 0 10px 0;
+            color: #6c4724;
+            font-size: 14px;
+            border-bottom: 1px solid #f5efe6;
+            padding-bottom: 5px;
+        }
+        .fila-usuario {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 10px;
+        }
+        .fila-usuario label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #4a3b2c;
+            min-width: 80px;
+        }
+        .input-clave-mini {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #c8b9a6;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .btn-update-mini {
+            background-color: #8c7355;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .bloque-backup-botones {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-backup {
+            background-color: #3b6647;
+            font-size: 12px;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        .btn-restore {
+            background-color: #4a6fa5;
+            font-size: 12px;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        /* CONTENEDOR PRINCIPAL DEL ÁLBUM: CUADRADO PERFECTO */
+        .album-area {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .libro-wrapper {
+            width: 100%;
+            max-width: 550px; 
+            background-color: #50341c; 
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 4px solid #362211;
+            box-sizing: border-box;
+            aspect-ratio: 1 / 1; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .libro {
+            flex: 1;
+            background-color: #faf6f0; 
+            border-radius: 4px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 15px;
+            box-sizing: border-box;
+            justify-content: space-between;
+        }
+
+        /* PORTADA Y DEDICATORIA */
+        .contenido-centro {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .titulo-portada {
+            font-family: 'Georgia', serif;
+            font-size: 28px;
+            color: #6c4724;
+            line-height: 1.3;
+            border-bottom: 2px dashed #d0beae;
+            padding-bottom: 15px;
+            width: 100%;
+        }
+
+        .subtitulo-portada {
+            font-size: 14px;
+            color: #8c7355;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        .texto-dedicatoria {
+            font-family: 'Georgia', serif;
+            font-size: 18px;
+            line-height: 1.6;
+            color: #4a3b2c;
+            font-style: italic;
+            padding: 0 10px;
+        }
+
+        .firma-creador {
+            align-self: flex-end;
+            margin-top: 20px;
+            text-align: right;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 13px;
+            color: #7c644e;
+            border-top: 1px dashed #c0ae9e;
+            padding-top: 5px;
+        }
+
+        /* CUADRÍCULA DE FOTOS */
+        .fotos-grid {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .foto-container {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 500px;
-        }
-
-        .sheet-right {
-            background: linear-gradient(to left, #ffffff 94%, #eaeaea 100%);
-            border-left: 2px solid #dcdcdc;
-        }
-
-        /* MARCO DE LA FOTO */
-        .photo-frame {
-            width: 100%;
-            max-width: 420px;
-            height: 380px;
-            border: 15px solid #fff;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-            background-color: #fafafa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border: 1px solid #e6ded4;
+            background-color: #faf8f5;
+            border-radius: 6px;
+            position: relative;
+            padding: 8px;
+            box-sizing: border-box;
             overflow: hidden;
-            border-radius: 2px;
         }
 
-        .photo-frame img {
+        .foto-placeholder {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #c8b9a6;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            box-sizing: border-box;
+            background-color: #fffcf9;
         }
 
-        /* TEXTO DE PIE DE PÁGINA */
-        .page-number {
-            margin-top: 15px;
-            font-size: 0.95em;
-            color: #7a6b5e;
+        .foto-placeholder span {
+            font-size: 13px;
+            color: #8c7355;
             font-weight: bold;
         }
 
-        /* BOTONES DE NAVEGACIÓN */
-        .navigation {
-            margin-top: 25px;
+        /* INTERFAZ SELECTOR CÁMARA/GALERÍA */
+        .menu-selector-interno {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(250, 246, 240, 0.96);
             display: flex;
             align-items: center;
-            gap: 15px;
+            justify-content: center;
+            gap: 25px;
+            z-index: 10;
         }
 
-        .btn {
-            background-color: #7a6b5e;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
+        .opcion-circulo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-size: 1em;
+        }
+
+        .circulo-icono {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: #6c4724;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            font-size: 24px;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .circulo-icono.galeria { background-color: #2b5797; }
+        .circulo-icono.camara { background-color: #e05d44; }
+        .opcion-circulo:active .circulo-icono { transform: scale(0.9); }
+        .opcion-circulo label { font-size: 11px; font-weight: bold; margin-top: 6px; color: #3e3227; cursor: pointer; }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 80%;
+            object-fit: contain; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            border: 4px solid white;
+            box-sizing: border-box;
+            display: none;
+            cursor: pointer;
+        }
+
+        .pie-foto-input {
+            width: 90%;
+            margin-top: 5px;
+            border: none;
+            border-bottom: 1px dashed #bbaaa0;
+            background: transparent;
+            text-align: center;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-size: 12px;
+            color: #4a3b2c;
+            outline: none;
+        }
+
+        .nro-pagina {
+            text-align: center;
+            font-size: 11px;
+            color: #a6927d;
             font-weight: bold;
-            transition: background 0.2s;
+            margin-top: 5px;
+        }
+
+        /* CONTROLES NAVEGACIÓN Y BUSCADOR */
+        .controles {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            width: 100%;
+            max-width: 550px;
+            gap: 8px;
+        }
+
+        .bloque-buscador {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .btn:hover {
-            background-color: #5c4a3c;
+        .input-buscar-hoja {
+            width: 45px;
+            border: none;
+            text-align: center;
+            font-weight: bold;
+            color: #6c4724;
+            font-size: 14px;
+            outline: none;
         }
 
-        .btn:disabled {
-            background-color: #cccccc;
+        button {
+            background-color: #6c4724;
+            color: #fbf9f6;
+            border: none;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        button:disabled {
+            background-color: #c0b3a7;
+            color: #e2dacd;
             cursor: not-allowed;
             box-shadow: none;
         }
 
-        .counter {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #5c4a3c;
-            min-width: 140px;
-            text-align: center;
-        }
+        .btn-volver { background-color: #8c7355; }
+        .btn-logout { background-color: #9e3a2b; color: white; }
+        .btn-logout-mini { background-color: #9e3a2b; padding: 4px 10px; border-radius: 12px; font-size: 11px; display: inline-block; color: white; cursor: pointer; font-weight: bold; box-shadow: none; flex: none; }
+        .btn-ir { background-color: #8c7355; padding: 6px 12px; font-size: 12px; border-radius: 14px; flex: none; box-shadow: none;}
+        .hidden { display: none !important; }
+        input[type="file"] { display: none; }
 
-        /* LISTA LATERAL O PANEL DE CONTROL DE FAMILIARES */
-        .family-list {
-            margin-top: 30px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            width: 100%;
-            max-width: 400px;
-            border-top: 4px solid #7a6b5e;
-        }
-
-        .family-list h3 {
-            margin-top: 0;
-            color: #5c4a3c;
-            text-align: center;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        .family-list ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .family-list li {
-            padding: 8px 12px;
-            border-bottom: 1px solid #f9f9f9;
-            color: #4a3b32;
-            font-weight: 500;
-            display: flex;
+        /* VISOR MODAL PARA ZOOM DE FOTOS */
+        .modal-zoom {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.9);
             align-items: center;
+            justify-content: center;
         }
-
-        .family-list li::before {
-            content: "👤 ";
-            margin-right: 10px;
+        .modal-zoom img {
+            max-width: 95%;
+            max-height: 85%;
+            object-fit: contain;
+            border: 4px solid white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .close-zoom {
+            position: absolute;
+            top: 20px; right: 25px;
+            color: white; font-size: 35px; font-weight: bold;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <h1>📸 Nuestro Álbum Familiar</h1>
-    <div class="admin-badge">VISTA ADMINISTRADOR (JORGE)</div>
+    <header>
+        <h1>Álbum Familiar</h1>
+        <p id="subtituloApp">Un legado de amor para toda la familia</p>
+    </header>
 
-    <!-- CUERPO DEL ÁLBUM (VISTA LIBRO ABIERTO DE 1000 HOJAS) -->
-    <div class="book-container">
-        <!-- LADO IZQUIERDO -->
-        <div class="sheet">
-            <div class="photo-frame">
-                <img id="img-left" src="foto1.jpg" alt="Foto Izquierda" onerror="this.src='https://via.placeholder.com/420x380?text=Espacio+para+Foto'">
-            </div>
-            <div class="page-number" id="page-num-left">Foto 1</div>
+    <div id="pantallaLogin" class="tarjeta-login">
+        <p style="color:#8c7355; font-style:italic; font-size:13px; margin:0 0 20px 0;">Ingresa tu usuario asignado</p>
+        <input type="text" id="usuarioInput" class="campo-input" placeholder="Usuario">
+        <input type="password" id="claveInput" class="campo-input" placeholder="Contraseña">
+        <button class="btn-ingresar" id="btnClickIngresar" onclick="autenticarUsuario()">Iniciar Sesión</button>
+    </div>
+
+    <div id="panelAdmin" class="panel-dashboard">
+        <div class="encabezado-panel">
+            <span id="mensajePanel" style="font-size:13px; font-weight:bold; color:#6c4724;"></span>
+            <button class="btn-logout-mini" onclick="cerrarSesion()">🔒 Salir</button>
         </div>
+        
+        <div id="contenedorTarjetas"></div>
 
-        <!-- LADO DERECHO -->
-        <div class="sheet sheet-right">
-            <div class="photo-frame">
-                <img id="img-right" src="foto2.jpg" alt="Foto Derecha" onerror="this.src='https://via.placeholder.com/420x380?text=Espacio+para+Foto'">
+        <div id="panelGestionClaves" class="seccion-gestion-claves hidden">
+            <h4>⚙️ Administrar Contraseñas del Sistema</h4>
+            <div id="listaClavesUsuarios"></div>
+            
+            <h4>💾 Copia de Seguridad del Álbum Completo</h4>
+            <div class="bloque-backup-botones">
+                <button class="btn-backup" onclick="exportarCopiaSeguridad()">📥 Descargar Copia (.json)</button>
+                <button class="btn-restore" onclick="document.getElementById('inputImportarFile').click()">📤 Restaurar Copia</button>
+                <input type="file" id="inputImportarFile" accept=".json" onchange="importarCopiaSeguridad(this)">
             </div>
-            <div class="page-number" id="page-num-right">Foto 2</div>
         </div>
     </div>
 
-    <!-- CONTROLES INFERIORES -->
-    <div class="navigation">
-        <button class="btn" id="btn-prev" onclick="navegar(-1)">◀ Anterior</button>
-        <span class="counter" id="sheet-counter">Hoja 1 de 1000</span>
-        <button class="btn" id="btn-next" onclick="navegar(1)">Siguiente ▶</button>
+    <div id="interfazAlbum" class="album-area">
+        <div class="libro-wrapper">
+            <div class="libro">
+                
+                <div id="hojaPortada" class="contenido-centro">
+                    <div class="titulo-portada">Nuestra Familia,<br>Nuestros Recuerdos</div>
+                    <div class="subtitulo-portada">Un viaje a través de los momentos más bellos.</div>
+                </div>
+
+                <div id="hojaDedicatoria" class="contenido-centro hidden">
+                    <div class="texto-dedicatoria">
+                        "Este álbum lo hago con mucho cariño para mis abuelos Emma y Emilio, también dedicado a mis tíos y mis primos hermanos."
+                    </div>
+                    <div class="firma-creador">
+                        CREADOR:<br>
+                        JORGE.L.Q.L
+                    </div>
+                </div>
+
+                <div id="hojaFotos" class="fotos-grid hidden">
+                    
+                    <div class="foto-container">
+                        <div class="foto-placeholder" id="label-f1" onclick="abrirMenuSelector('menu-f1')">
+                            <span>📷 Toca para añadir foto superior</span>
+                        </div>
+
+                        <div id="menu-f1" class="menu-selector-interno hidden">
+                            <div class="opcion-circulo" onclick="document.getElementById('cam-input-f1').click()">
+                                <div class="circulo-icono camara">📸</div><label>Cámara</label>
+                                <input type="file" id="cam-input-f1" accept="image/*" capture="environment" onchange="procesarYComprimirFoto(this, 'img-f1', 'label-f1', 'menu-f1', 'fotoArriba')">
+                            </div>
+                            <div class="opcion-circulo" onclick="document.getElementById('gal-input-f1').click()">
+                                <div class="circulo-icono galeria">🖼️</div><label>Galería</label>
+                                <input type="file" id="gal-input-f1" accept="image/*" onchange="procesarYComprimirFoto(this, 'img-f1', 'label-f1', 'menu-f1', 'fotoArriba')">
+                            </div>
+                        </div>
+                        
+                        <img id="img-f1" class="preview-img" alt="Foto Superior" onclick="manejarClickFoto('label-f1', 'img-f1')">
+                        <input type="text" class="pie-foto-input" placeholder="Escribe un recuerdo aquí..." id="pie-f1" oninput="guardarTexto('fotoArriba', this.value)">
+                    </div>
+                    
+                    <div class="foto-container">
+                        <div class="foto-placeholder" id="label-f2" onclick="abrirMenuSelector('menu-f2')">
+                            <span>📷 Toca para añadir foto inferior</span>
+                        </div>
+
+                        <div id="menu-f2" class="menu-selector-interno hidden">
+                            <div class="opcion-circulo" onclick="document.getElementById('cam-input-f2').click()">
+                                <div class="circulo-icono camara">📸</div><label>Cámara</label>
+                                <input type="file" id="cam-input-f2" accept="image/*" capture="environment" onchange="procesarYComprimirFoto(this, 'img-f2', 'label-f2', 'menu-f2', 'fotoAbajo')">
+                            </div>
+                            <div class="opcion-circulo" onclick="document.getElementById('gal-input-f2').click()">
+                                <div class="circulo-icono galeria">🖼️</div><label>Galería</label>
+                                <input type="file" id="gal-input-f2" accept="image/*" onchange="procesarYComprimirFoto(this, 'img-f2', 'label-f2', 'menu-f2', 'fotoAbajo')">
+                            </div>
+                        </div>
+                        
+                        <img id="img-f2" class="preview-img" alt="Foto Inferior" onclick="manejarClickFoto('label-f2', 'img-f2')">
+                        <input type="text" class="pie-foto-input" placeholder="Escribe un recuerdo aquí..." id="pie-f2" oninput="guardarTexto('fotoAbajo', this.value)">
+                    </div>
+
+                </div>
+
+                <div class="nro-pagina" id="p_indicador">Portada</div>
+            </div>
+        </div>
+
+        <div class="controles">
+            <button id="btnAnterior" onclick="navegar(-1)" disabled>←</button>
+            
+            <div class="bloque-buscador">
+                <input type="number" id="inputBuscarHoja" class="input-buscar-hoja" min="1" max="1000" placeholder="H">
+                <button class="btn-ir" onclick="saltarAPagina()">Ir</button>
+            </div>
+
+            <button id="btnVolverMenu" class="btn-volver hidden" onclick="volverAlMenuAdmin()">🏠</button>
+            <button id="btnCerrarSesionAlbum" class="btn-logout hidden" onclick="cerrarSesion()">🔒</button>
+            <button id="btnSiguiente" onclick="navegar(1)">→</button>
+        </div>
     </div>
 
-    <!-- LISTA DE CONTROL DE FAMILIARES AUTORIZADOS -->
-    <div class="family-list">
-        <h3>Familiares con Acceso</h3>
-        <ul>
-            <li>Fabiola</li>
-            <li>Luis</li>
-            <li>Jorge.S</li> 
-            <li>Hortencia</li>
-            <li>Amelia</li>
-        </ul>
+    <div id="modalZoom" class="modal-zoom" onclick="cerrarZoom()">
+        <span class="close-zoom">&times;</span>
+        <img id="imgModalZoomSrc" src="" alt="Zoom Recuerdo">
     </div>
 
     <script>
-        // Configuración fija del álbum ajustada a 1000 hojas
-        const TOTAL_HOJAS = 1000; 
-        let hojaActual = 1;
+        // CONFIGURACIÓN BASE DE USUARIOS (Incluye a tu papá Jorge.S con clave de fábrica)
+        const clavesDefecto = {
+            'jorge': 'admin2026',
+            'fabiola': 'fabi123',
+            'luis': 'luis123',
+            'jorge.s': 'jorgeS123',
+            'hortencia': 'horten123',
+            'amelia': 'amelia123'
+        };
 
-        function actualizarAlbum() {
-            let fotoIzquierda = (hojaActual * 2) - 1;
-            let fotoDerecha = hojaActual * 2;
+        let bdClaves = JSON.parse(localStorage.getItem('bd_album_claves_quezada')) || clavesDefecto;
 
-            const imgLeft = document.getElementById('img-left');
-            const imgRight = document.getElementById('img-right');
-            const txtLeft = document.getElementById('page-num-left');
-            const txtRight = document.getElementById('page-num-right');
-            const sheetCounter = document.getElementById('sheet-counter');
+        const usuariosSistema = {
+            'jorge': { rol: 'admin', album: 'ADMIN' },
+            'fabiola': { rol: 'familia', album: 'FABIOLA QUEZADA' },
+            'luis': { rol: 'familia', album: 'LUIS QUEZADA' },
+            'jorge.s': { rol: 'familia', album: 'JORGE S. QUEZADA' },
+            'hortencia': { rol: 'familia', album: 'ORTENCIA QUEZADA' },
+            'amelia': { rol: 'familia', album: 'AMELIA QUEZADA' }
+        };
 
-            // Carga las fotos correspondientes (foto1.jpg, foto2.jpg, etc.)
-            imgLeft.src = `foto${fotoIzquierda}.jpg`;
-            imgRight.src = `foto${fotoDerecha}.jpg`;
+        let usuarioLogueado = null;
+        let albumActivo = ""; 
+        let hojaActual = 0; 
+        const totalHojas = 1002; // Ajustado para soportar las 1000 hojas + Portada y Dedicatoria
 
-            txtLeft.innerText = `Foto ${fotoIzquierda}`;
-            txtRight.innerText = `Foto ${fotoDerecha}`;
+        let baseDatosFotos = JSON.parse(localStorage.getItem('bd_album_familiar_quezada')) || {};
 
-            sheetCounter.innerText = `Hoja ${hojaActual} de ${TOTAL_HOJAS}`;
+        // DETECTORES PARA ENTER AUTOMÁTICO EN ACCESOS Y BUSCADORES
+        document.getElementById('usuarioInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') { autenticarUsuario(); } });
+        document.getElementById('claveInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') { autenticarUsuario(); } });
+        document.getElementById('inputBuscarHoja').addEventListener('keydown', function(e) { if (e.key === 'Enter') { saltarAPagina(); } });
 
-            document.getElementById('btn-prev').disabled = (hojaActual === 1);
-            document.getElementById('btn-next').disabled = (hojaActual === TOTAL_HOJAS);
-        }
+        function autenticarUsuario() {
+            const user = document.getElementById('usuarioInput').value.trim().toLowerCase();
+            const pass = document.getElementById('claveInput').value.trim();
 
-        function navegar(direccion) {
-            let nuevaHoja = hojaActual + direccion;
-            if (nuevaHoja >= 1 && nuevaHoja <= TOTAL_HOJAS) {
-                hojaActual = nuevaHoja;
-                actualizarAlbum();
+            if (usuariosSistema[user] && bdClaves[user] === pass) {
+                usuarioLogueado = usuariosSistema[user];
+                usuarioLogueado.username = user; 
+                document.getElementById('pantallaLogin').style.display = 'none';
+                
+                document.getElementById('usuarioInput').value = "";
+                document.getElementById('claveInput').value = "";
+
+                generarPanelControl();
+            } else {
+                alert("Usuario o contraseña incorrectos.");
             }
         }
 
-        // Arrancar el álbum
-        actualizarAlbum();
-    </script>
+        function generarPanelControl() {
+            const panel = document.getElementById('panelAdmin');
+            const mensaje = document.getElementById('mensajePanel');
+            const contenedor = document.getElementById('contenedorTarjetas');
+            const subpanelClaves = document.getElementById('panelGestionClaves');
+            
+            panel.style.display = 'flex';
+            contenedor.innerHTML = ""; 
 
+            if (usuarioLogueado.rol === 'admin') {
+                mensaje.innerText = "Admin (Jorge):";
+                
+                const albumes = ['FABIOLA QUEZADA', 'LUIS QUEZADA', 'JORGE QUEZADA', 'ORTENCIA QUEZADA', 'AMELIA QUEZADA'];
+                albumes.forEach(nom => {
+                    contenedor.innerHTML += `<div class="tarjeta-familia" onclick="cargarAlbumActivo('${nom}')"><h3>Álbum de ${nom}</h3><span>Revisar →</span></div>`;
+                });
+
+                subpanelClaves.classList.remove('hidden');
+                renderizarListaClaves();
+            } else {
+                mensaje.innerText = `Hola, ${usuarioLogueado.username.toUpperCase()}:`;
+                subpanelClaves.classList.add('hidden'); 
+                
+                contenedor.innerHTML += `<div class="tarjeta-familia" onclick="cargarAlbumActivo('${usuarioLogueado.album}')"><h3>Mi Álbum Personal</h3><span>Ingresar →</span></div>`;
+            }
+
+            contenedor.innerHTML += `<div class="tarjeta-familia tarjeta-general" onclick="cargarAlbumActivo('GENERAL')"><h3>ÁLBUM COMÚN GENERAL</h3><span>Ver Todos 👥</span></div>`;
+            
+            document.getElementById('btnVolverMenu').classList.remove('hidden');
+            document.getElementById('btnCerrarSesionAlbum').classList.remove('hidden');
+        }
+
+        function cerrarSesion() {
+            usuarioLogueado = null;
+            albumActivo = "";
+            hojaActual = 0;
+
+            document.getElementById('panelAdmin').style.display = 'none';
+            document.getElementById('interfazAlbum').style.display = 'none';
+            document.getElementById('pantallaLogin').style.display = 'block';
+            document.getElementById('usuarioInput').focus();
+        }
+
+        function renderizarListaClaves() {
+            const listaContenedor = document.getElementById('listaClavesUsuarios');
+            listaContenedor.innerHTML = "";
+
+            // Lista ordenada exactamente según tu especificación con tu papá debajo de Luis
+            const todosLosUsuarios = ['jorge', 'fabiola', 'luis', 'jorge.s', 'hortencia', 'amelia'];
+            
+            todosLosUsuarios.forEach(userKey => {
+                const esAdmin = userKey === 'jorge';
+                listaContenedor.innerHTML += `
+                    <div class="fila-usuario">
+                        <label>${userKey.toUpperCase()}${esAdmin ? ' (Tú)' : ''}:</label>
+                        <input type="text" id="pass-input-${userKey}" class="input-clave-mini" value="${bdClaves[userKey]}">
+                        <button class="btn-update-mini" onclick="guardarNuevaClave('${userKey}')">Actualizar</button>
+                    </div>
+                `;
+            });
+        }
+
+        function guardarNuevaClave(userKey) {
+            const nuevaClave = document.getElementById(`pass-input-${userKey}`).value.trim();
+            if(nuevaClave === "") {
+                alert("La contraseña no puede estar vacía.");
+                return;
+            }
+            bdClaves[userKey] = nuevaClave;
+            localStorage.setItem('bd_album_claves_quezada', JSON.stringify(bdClaves));
+            alert(`¡Contraseña de ${userKey.toUpperCase()} actualizada con éxito!`);
+        }
+
+        // FUNCIONES BACKUP (EXPORTAR / IMPORTAR)
+        function exportarCopiaSeguridad() {
+            const dataCompleta = {
+                fotosYTextos: baseDatosFotos,
+                contraseñas: bdClaves
+            };
+            const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataCompleta));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", jsonString);
+            downloadAnchor.setAttribute("download", "copia_seguridad_album_familiar.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importarCopiaSeguridad(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const dataImportada = JSON.parse(e.target.result);
+                    if (dataImportada.fotosYTextos && dataImportada.contraseñas) {
+                        baseDatosFotos = dataImportada.fotosYTextos;
+                        bdClaves = dataImportada.contraseñas;
+                        
+                        localStorage.setItem('bd_album_familiar_quezada', JSON.stringify(baseDatosFotos));
+                        localStorage.setItem('bd_album_claves_quezada', JSON.stringify(bdClaves));
+                        
+                        alert("¡Copia de seguridad restaurada correctamente! La página se recargará.");
+                        location.reload();
+                    } else {
+                        alert("El archivo seleccionado no tiene el formato correcto.");
+                    }
+                } catch (error) {
+                    alert("Error al leer el archivo. Asegúrate de que sea el archivo .json correcto.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function cargarAlbumActivo(nombreAlbum) {
+            albumActivo = nombreAlbum;
+            document.getElementById('panelAdmin').style.display = 'none';
+            document.getElementById('interfazAlbum').style.display = 'flex';
+            hojaActual = 0;
+            navegar(0);
+        }
+
+        function volverAlMenuAdmin() {
+            document.getElementById('interfazAlbum').style.display = 'none';
+            generarPanelControl();
+        }
+
+        function navegar(direccion) {
+            hojaActual += direccion;
+            if(hojaActual < 0) hojaActual = 0;
+            if(hojaActual >= totalHojas) hojaActual = totalHojas - 1;
+
+            document.getElementById('btnAnterior').disabled = (hojaActual === 0);
+            document.getElementById('btnSiguiente').disabled = (hojaActual === totalHojas - 1);
+
+            document.getElementById('hojaPortada').classList.add('hidden');
+            document.getElementById('hojaDedicatoria').classList.add('hidden');
+            document.getElementById('hojaFotos').classList.add('hidden');
+            document.getElementById('menu-f1').classList.add('hidden');
+            document.getElementById('menu-f2').classList.add('hidden');
+
+            const indicador = document.getElementById('p_indicador');
+            document.getElementById('inputBuscarHoja').value = "";
+
+            if (hojaActual === 0) {
+                document.getElementById('hojaPortada').classList.remove('hidden');
+                indicador.innerText = "Portada - " + albumActivo;
+            } else if (hojaActual === 1) {
+                document.getElementById('hojaDedicatoria').classList.remove('hidden');
+                indicador.innerText = "Dedicatoria";
+            } else {
+                document.getElementById('hojaFotos').classList.remove('hidden');
+                indicador.innerText = "Hoja " + (hojaActual - 1) + " de 1000";
+                renderizarDatosHoja();
+            }
+        }
+
+        // FUNCIÓN DEL BUSCADOR AJUSTADA A 1000 HOJAS
+        function saltarAPagina() {
+            const numeroHoja = parseInt(document.getElementById('inputBuscarHoja').value);
+            if (isNaN(numeroHoja) || numeroHoja < 1 || numeroHoja > 1000) {
+                alert("Por favor ingresa un número de hoja válido entre 1 y 1000.");
+                return;
+            }
+            hojaActual = numeroHoja + 1;
+            navegar(0);
+        }
+
+        // FUNCIONES DE ZOOM FLOTANTE
+        function manejarClickFoto(labelId, imgId) {
+            const imgEl = document.getElementById(imgId);
+            if(imgEl.src && imgEl.style.display !== "none") {
+                document.getElementById('imgModalZoomSrc').src = imgEl.src;
+                document.getElementById('modalZoom').style.display = "flex";
+            } else {
+                cambiarFoto(labelId, imgId);
+            }
+        }
+
+        function cerrarZoom() {
+            document.getElementById('modalZoom').style.display = "none";
+        }
+
+        function abrirMenuSelector(idMenu) {
+            document.getElementById(idMenu).classList.remove('hidden');
+        }
+
+        function asegurarEstructuraAlbum() {
+            if (!baseDatosFotos[albumActivo]) baseDatosFotos[albumActivo] = {};
+            if (!baseDatosFotos[albumActivo][hojaActual]) {
+                baseDatosFotos[albumActivo][hojaActual] = {
+                    fotoArriba: { img: "", text: "" },
+                    fotoAbajo: { img: "", text: "" }
+                };
+            }
+        }
+
+        function procesarYComprimirFoto(input, imgId, labelId, menuId, posicionKey) {
+            const file = input.files[0];
+            if (!file) {
+                document.getElementById(menuId).classList.add('hidden');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const max_size = 500; 
+
+                    if (width > height) {
+                        if (width > max_size) { height *= max_size / width; width = max_size; }
+                    } else {
+                        if (height > max_size) { height *= max_size / height; width = max_size; }
+                    }
+
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const base64Optimizado = canvas.toDataURL('image/jpeg', 0.6);
+                    
+                    asegurarEstructuraAlbum();
+                    baseDatosFotos[albumActivo][hojaActual][posicionKey].img = base64Optimizado;
+
+                    localStorage.setItem('bd_album_familiar_quezada', JSON.stringify(baseDatosFotos));
+
+                    const imgEl = document.getElementById(imgId);
+                    const labelEl = document.getElementById(labelId);
+                    
+                    imgEl.src = base64Optimizado;
+                    imgEl.style.display = "block";
+                    labelEl.style.display = "none";
+                    document.getElementById(menuId).classList.add('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            input.value = ""; 
+        }
+
+        function cambiarFoto(labelId, imgId) {
+            const imgEl = document.getElementById(imgId);
+            if (imgEl.src && imgEl.style.display === "block") {
+                if(!confirm("¿Deseas cambiar esta foto por otra nueva?")) return;
+            }
+            imgEl.style.display = "none";
+            document.getElementById(labelId).style.display = "flex";
+        }
+
+        function guardarTexto(posicionKey, valor) {
+            asegurarEstructuraAlbum();
+            baseDatosFotos[albumActivo][hojaActual][posicionKey].text = valor;
+            localStorage.setItem('bd_album_familiar_quezada', JSON.stringify(baseDatosFotos));
+        }
+
+        function renderizarDatosHoja() {
+            const data = (baseDatosFotos[albumActivo] && baseDatosFotos[albumActivo][hojaActual]) ? 
+                          baseDatosFotos[albumActivo][hojaActual] : 
+                          { fotoArriba: { img: "", text: "" }, fotoAbajo: { img: "", text: "" } };
+            
+            // Render Superior
+            const img1 = document.getElementById('img-f1');
+            const label1 = document.getElementById('label-f1');
+            const pie1 = document.getElementById('pie-f1');
+            
+            if(data.fotoArriba.img) {
+                img1.src = data.fotoArriba.img;
+                img1.style.display = "block";
+                label1.style.display = "none";
+            } else {
+                img1.src = ""; img1.style.display = "none"; label1.style.display = "flex";
+            }
+            pie1.value = data.fotoArriba.text || "";
+
+            // Render Inferior
+            const img2 = document.getElementById('img-f2');
+            const label2 = document.getElementById('label-f2');
+            const pie2 = document.getElementById('pie-f2');
+
+            if(data.fotoAbajo.img) {
+                img2.src = data.fotoAbajo.img;
+                img2.style.display = "block";
+                label2.style.display = "none";
+            } else {
+                img2.src = ""; img2.style.display = "none"; label2.style.display = "flex";
+            }
+            pie2.value = data.fotoAbajo.text || "";
+        }
+    </script>
 </body>
 </html>
