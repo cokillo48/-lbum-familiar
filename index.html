@@ -16,7 +16,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
+            justify-flex-start;
             box-sizing: border-box;
         }
 
@@ -133,23 +133,38 @@
         }
         .fila-usuario {
             display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #f5efe6;
+        }
+        .fila-usuario-inputs {
+            display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
-            gap: 10px;
+            gap: 6px;
         }
-        .fila-usuario label {
-            font-size: 13px;
+        .label-usuario-fijo {
+            font-size: 11px;
             font-weight: bold;
-            color: #4a3b2c;
-            min-width: 80px;
+            color: #8c7355;
+            margin-bottom: 2px;
         }
-        .input-clave-mini {
-            flex: 1;
+        .input-usuario-mini, .input-clave-mini {
             padding: 6px;
             border: 1px solid #c8b9a6;
             border-radius: 6px;
             font-size: 12px;
+            box-sizing: border-box;
+        }
+        .input-usuario-mini {
+            width: 100px;
+            background-color: #faf8f5;
+            font-weight: bold;
+        }
+        .input-clave-mini {
+            flex: 1;
         }
         .btn-update-mini {
             background-color: #8c7355;
@@ -473,6 +488,7 @@
         <p id="subtituloApp">Un legado de amor para toda la familia</p>
     </header>
 
+    <!-- 1. FORMULARIO DE ACCESO -->
     <div id="pantallaLogin" class="tarjeta-login">
         <p style="color:#8c7355; font-style:italic; font-size:13px; margin:0 0 20px 0;">Ingresa tu usuario asignado</p>
         <input type="text" id="usuarioInput" class="campo-input" placeholder="Usuario">
@@ -480,6 +496,7 @@
         <button class="btn-ingresar" id="btnClickIngresar" onclick="autenticarUsuario()">Iniciar Sesión</button>
     </div>
 
+    <!-- 2. PANEL DINÁMICO ADAPTATIVO -->
     <div id="panelAdmin" class="panel-dashboard">
         <div class="encabezado-panel">
             <span id="mensajePanel" style="font-size:13px; font-weight:bold; color:#6c4724;"></span>
@@ -488,8 +505,9 @@
         
         <div id="contenedorTarjetas"></div>
 
+        <!-- SUBPANEL EXCLUSIVO PARA JORGE: GESTIÓN DE USUARIOS, CLAVES Y BACKUPS -->
         <div id="panelGestionClaves" class="seccion-gestion-claves hidden">
-            <h4>⚙️ Administrar Contraseñas del Sistema</h4>
+            <h4>⚙️ Administrar Usuarios y Contraseñas</h4>
             <div id="listaClavesUsuarios"></div>
             
             <h4>💾 Copia de Seguridad del Álbum Completo</h4>
@@ -501,15 +519,18 @@
         </div>
     </div>
 
+    <!-- 3. INTERFAZ INTERACTIVA DEL ÁLBUM -->
     <div id="interfazAlbum" class="album-area">
         <div class="libro-wrapper">
             <div class="libro">
                 
+                <!-- HOJA 0: PORTADA -->
                 <div id="hojaPortada" class="contenido-centro">
                     <div class="titulo-portada">Nuestra Familia,<br>Nuestros Recuerdos</div>
                     <div class="subtitulo-portada">Un viaje a través de los momentos más bellos.</div>
                 </div>
 
+                <!-- HOJA 1: DEDICATORIA -->
                 <div id="hojaDedicatoria" class="contenido-centro hidden">
                     <div class="texto-dedicatoria">
                         "Este álbum lo hago con mucho cariño para mis abuelos Emma y Emilio, también dedicado a mis tíos y mis primos hermanos."
@@ -520,8 +541,10 @@
                     </div>
                 </div>
 
+                <!-- HOJAS REGISTRO DE FOTOS (HASTA 1000 HOJAS) -->
                 <div id="hojaFotos" class="fotos-grid hidden">
                     
+                    <!-- FOTO SUPERIOR -->
                     <div class="foto-container">
                         <div class="foto-placeholder" id="label-f1" onclick="abrirMenuSelector('menu-f1')">
                             <span>📷 Toca para añadir foto superior</span>
@@ -542,6 +565,7 @@
                         <input type="text" class="pie-foto-input" placeholder="Escribe un recuerdo aquí..." id="pie-f1" oninput="guardarTexto('fotoArriba', this.value)">
                     </div>
                     
+                    <!-- FOTO INFERIOR -->
                     <div class="foto-container">
                         <div class="foto-placeholder" id="label-f2" onclick="abrirMenuSelector('menu-f2')">
                             <span>📷 Toca para añadir foto inferior</span>
@@ -568,6 +592,7 @@
             </div>
         </div>
 
+        <!-- BOTONES DE NAVEGACIÓN Y BUSCADOR -->
         <div class="controles">
             <button id="btnAnterior" onclick="navegar(-1)" disabled>←</button>
             
@@ -582,37 +607,30 @@
         </div>
     </div>
 
+    <!-- VENTANA MODAL PARA ZOOM DE FOTOGRAFÍAS -->
     <div id="modalZoom" class="modal-zoom" onclick="cerrarZoom()">
         <span class="close-zoom">&times;</span>
         <img id="imgModalZoomSrc" src="" alt="Zoom Recuerdo">
     </div>
 
     <script>
-        // CONFIGURACIÓN BASE DE USUARIOS (Incluye a tu papá Jorge.S con clave de fábrica)
-        const clavesDefecto = {
-            'jorge': 'admin2026',
-            'fabiola': 'fabi123',
-            'luis': 'luis123',
-            'jorge.s': 'jorgeS123',
-            'hortencia': 'horten123',
-            'amelia': 'amelia123'
+        // CONFIGURACIÓN BASE DE USUARIOS (Valores iniciales de fábrica)
+        const cuentasDefecto = {
+            'jorge': { usuario: 'jorge', clave: 'admin2026', rol: 'admin', album: 'ADMIN' },
+            'fabiola': { usuario: 'fabiola', clave: 'fabi123', rol: 'familia', album: 'FABIOLA QUEZADA' },
+            'luis': { usuario: 'luis', clave: 'luis123', rol: 'familia', album: 'LUIS QUEZADA' },
+            'jorge.s': { usuario: 'jorge.s', clave: 'jorgeS123', rol: 'familia', album: 'JORGE S. QUEZADA' },
+            'hortencia': { usuario: 'hortencia', clave: 'horten123', rol: 'familia', album: 'ORTENCIA QUEZADA' },
+            'amelia': { usuario: 'amelia', clave: 'amelia123', rol: 'familia', album: 'AMELIA QUEZADA' }
         };
 
-        let bdClaves = JSON.parse(localStorage.getItem('bd_album_claves_quezada')) || clavesDefecto;
-
-        const usuariosSistema = {
-            'jorge': { rol: 'admin', album: 'ADMIN' },
-            'fabiola': { rol: 'familia', album: 'FABIOLA QUEZADA' },
-            'luis': { rol: 'familia', album: 'LUIS QUEZADA' },
-            'jorge.s': { rol: 'familia', album: 'JORGE S. QUEZADA' },
-            'hortencia': { rol: 'familia', album: 'ORTENCIA QUEZADA' },
-            'amelia': { rol: 'familia', album: 'AMELIA QUEZADA' }
-        };
+        // Estructura integrada en una única clave de LocalStorage para evitar conflictos de sincronización
+        let bdCuentas = JSON.parse(localStorage.getItem('bd_album_cuentas_quezada_v2')) || cuentasDefecto;
 
         let usuarioLogueado = null;
         let albumActivo = ""; 
         let hojaActual = 0; 
-        const totalHojas = 1002; // Ajustado para soportar las 1000 hojas + Portada y Dedicatoria
+        const totalHojas = 1002; 
 
         let baseDatosFotos = JSON.parse(localStorage.getItem('bd_album_familiar_quezada')) || {};
 
@@ -622,12 +640,21 @@
         document.getElementById('inputBuscarHoja').addEventListener('keydown', function(e) { if (e.key === 'Enter') { saltarAPagina(); } });
 
         function autenticarUsuario() {
-            const user = document.getElementById('usuarioInput').value.trim().toLowerCase();
-            const pass = document.getElementById('claveInput').value.trim();
+            const userIngresado = document.getElementById('usuarioInput').value.trim().toLowerCase();
+            const passIngresado = document.getElementById('claveInput').value.trim();
 
-            if (usuariosSistema[user] && bdClaves[user] === pass) {
-                usuarioLogueado = usuariosSistema[user];
-                usuarioLogueado.username = user; 
+            // Buscar si el usuario ingresado coincide con el campo 'usuario' de alguna de nuestras cuentas activas
+            let cuentaEncontrada = null;
+            for (let id in bdCuentas) {
+                if (bdCuentas[id].usuario.toLowerCase() === userIngresado && bdCuentas[id].clave === passIngresado) {
+                    cuentaEncontrada = bdCuentas[id];
+                    cuentaEncontrada.idInterno = id; // Guardar referencia de su ID base
+                    break;
+                }
+            }
+
+            if (cuentaEncontrada) {
+                usuarioLogueado = cuentaEncontrada;
                 document.getElementById('pantallaLogin').style.display = 'none';
                 
                 document.getElementById('usuarioInput').value = "";
@@ -649,7 +676,7 @@
             contenedor.innerHTML = ""; 
 
             if (usuarioLogueado.rol === 'admin') {
-                mensaje.innerText = "Admin (Jorge):";
+                mensaje.innerText = `Admin (${usuarioLogueado.usuario.toUpperCase()}):`;
                 
                 const albumes = ['FABIOLA QUEZADA', 'LUIS QUEZADA', 'JORGE QUEZADA', 'ORTENCIA QUEZADA', 'AMELIA QUEZADA'];
                 albumes.forEach(nom => {
@@ -659,7 +686,7 @@
                 subpanelClaves.classList.remove('hidden');
                 renderizarListaClaves();
             } else {
-                mensaje.innerText = `Hola, ${usuarioLogueado.username.toUpperCase()}:`;
+                mensaje.innerText = `Hola, ${usuarioLogueado.usuario.toUpperCase()}:`;
                 subpanelClaves.classList.add('hidden'); 
                 
                 contenedor.innerHTML += `<div class="tarjeta-familia" onclick="cargarAlbumActivo('${usuarioLogueado.album}')"><h3>Mi Álbum Personal</h3><span>Ingresar →</span></div>`;
@@ -686,37 +713,59 @@
             const listaContenedor = document.getElementById('listaClavesUsuarios');
             listaContenedor.innerHTML = "";
 
-            // Lista ordenada exactamente según tu especificación con tu papá debajo de Luis
-            const todosLosUsuarios = ['jorge', 'fabiola', 'luis', 'jorge.s', 'hortencia', 'amelia'];
+            // Orden estricto solicitado por Jorge
+            const ordenUsuarios = ['jorge', 'fabiola', 'luis', 'jorge.s', 'hortencia', 'amelia'];
             
-            todosLosUsuarios.forEach(userKey => {
-                const esAdmin = userKey === 'jorge';
+            ordenUsuarios.forEach(idKey => {
+                const cuenta = bdCuentas[idKey];
+                const esAdmin = cuenta.rol === 'admin';
+                
                 listaContenedor.innerHTML += `
                     <div class="fila-usuario">
-                        <label>${userKey.toUpperCase()}${esAdmin ? ' (Tú)' : ''}:</label>
-                        <input type="text" id="pass-input-${userKey}" class="input-clave-mini" value="${bdClaves[userKey]}">
-                        <button class="btn-update-mini" onclick="guardarNuevaClave('${userKey}')">Actualizar</button>
+                        <div class="label-usuario-fijo">CUENTA DE: ${idKey.toUpperCase()}${esAdmin ? ' (Tú)' : ''}</div>
+                        <div class="fila-usuario-inputs">
+                            <input type="text" id="user-input-${idKey}" class="input-usuario-mini" value="${cuenta.usuario}" placeholder="Usuario">
+                            <input type="text" id="pass-input-${idKey}" class="input-clave-mini" value="${cuenta.clave}" placeholder="Contraseña">
+                            <button class="btn-update-mini" onclick="guardarDatosCuenta('${idKey}')">Guardar</button>
+                        </div>
                     </div>
                 `;
             });
         }
 
-        function guardarNuevaClave(userKey) {
-            const nuevaClave = document.getElementById(`pass-input-${userKey}`).value.trim();
-            if(nuevaClave === "") {
-                alert("La contraseña no puede estar vacía.");
+        function guardarDatosCuenta(idKey) {
+            const nuevoUser = document.getElementById(`user-input-${idKey}`).value.trim().toLowerCase();
+            const nuevaClave = document.getElementById(`pass-input-${idKey}`).value.trim();
+            
+            if(nuevoUser === "" || nuevaClave === "") {
+                alert("Ni el usuario ni la contraseña pueden estar vacíos.");
                 return;
             }
-            bdClaves[userKey] = nuevaClave;
-            localStorage.setItem('bd_album_claves_quezada', JSON.stringify(bdClaves));
-            alert(`¡Contraseña de ${userKey.toUpperCase()} actualizada con éxito!`);
+
+            // Validar que el nuevo nombre de usuario no esté duplicado en otra ID
+            for(let id in bdCuentas) {
+                if(id !== idKey && bdCuentas[id].usuario.toLowerCase() === nuevoUser) {
+                    alert(`El nombre de usuario "${nuevoUser}" ya lo está usando otra persona. Elige uno diferente.`);
+                    return;
+                }
+            }
+
+            // Guardar cambios directamente en el objeto unificado
+            bdCuentas[idKey].usuario = nuevoUser;
+            bdCuentas[idKey].clave = nuevaClave;
+            
+            localStorage.setItem('bd_album_cuentas_quezada_v2', JSON.stringify(bdCuentas));
+            alert(`¡Datos de la cuenta de ${idKey.toUpperCase()} actualizados con éxito!\nUsuario: ${nuevoUser}\nContraseña: ${nuevaClave}`);
+            
+            // Refrescar el panel visual
+            renderizarListaClaves();
         }
 
-        // FUNCIONES BACKUP (EXPORTAR / IMPORTAR)
+        // FUNCIONES BACKUP (EXPORTAR / IMPORTAR ADAPTADOS A LA NUEVA BD)
         function exportarCopiaSeguridad() {
             const dataCompleta = {
                 fotosYTextos: baseDatosFotos,
-                contraseñas: bdClaves
+                cuentas: bdCuentas
             };
             const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataCompleta));
             const downloadAnchor = document.createElement('a');
@@ -735,12 +784,15 @@
             reader.onload = function(e) {
                 try {
                     const dataImportada = JSON.parse(e.target.result);
-                    if (dataImportada.fotosYTextos && dataImportada.contraseñas) {
+                    // Compatible con backups antiguos y nuevos
+                    if (dataImportada.fotosYTextos) {
                         baseDatosFotos = dataImportada.fotosYTextos;
-                        bdClaves = dataImportada.contraseñas;
-                        
                         localStorage.setItem('bd_album_familiar_quezada', JSON.stringify(baseDatosFotos));
-                        localStorage.setItem('bd_album_claves_quezada', JSON.stringify(bdClaves));
+
+                        if (dataImportada.cuentas) {
+                            bdCuentas = dataImportada.cuentas;
+                            localStorage.setItem('bd_album_cuentas_quezada_v2', JSON.stringify(bdCuentas));
+                        }
                         
                         alert("¡Copia de seguridad restaurada correctamente! La página se recargará.");
                         location.reload();
@@ -797,7 +849,6 @@
             }
         }
 
-        // FUNCIÓN DEL BUSCADOR AJUSTADA A 1000 HOJAS
         function saltarAPagina() {
             const numeroHoja = parseInt(document.getElementById('inputBuscarHoja').value);
             if (isNaN(numeroHoja) || numeroHoja < 1 || numeroHoja > 1000) {
@@ -808,7 +859,6 @@
             navegar(0);
         }
 
-        // FUNCIONES DE ZOOM FLOTANTE
         function manejarClickFoto(labelId, imgId) {
             const imgEl = document.getElementById(imgId);
             if(imgEl.src && imgEl.style.display !== "none") {
