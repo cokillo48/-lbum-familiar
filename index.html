@@ -811,7 +811,7 @@
             contenedor.innerHTML = ""; 
 
             if (usuarioLogueado.rol === 'admin') {
-                mensaje.innerText = `Panel del Administrator`;
+                mensaje.innerText = `Panel del Administrador`;
                 
                 for (let id in bdCuentas) {
                     if (bdCuentas[id].rol !== 'admin') {
@@ -1129,10 +1129,10 @@
                         if (baseDatosFotos[alb] && baseDatosFotos[alb][h]) {
                             const nodo = baseDatosFotos[alb][h];
                             if (nodo.fotoArriba && nodo.fotoArriba.img) {
-                                listaFotosCarrusel.push({ img: nodo.fotoArriba.img, text: nodo.fotoArriba.text, creador: bdCuentas[id].usuario, hoja: h - 1 });
+                                listaFotosCarrusel.push({ img: nodo.fotoArriba.img, text: nodo.fotoArriba.text, creator: bdCuentas[id].usuario, hoja: h - 1 });
                             }
                             if (nodo.fotoAbajo && nodo.fotoAbajo.img) {
-                                listaFotosCarrusel.push({ img: nodo.fotoAbajo.img, text: nodo.fotoAbajo.text, creador: bdCuentas[id].usuario, hoja: h - 1 });
+                                listaFotosCarrusel.push({ img: nodo.fotoAbajo.img, text: nodo.fotoAbajo.text, creator: bdCuentas[id].usuario, hoja: h - 1 });
                             }
                         }
                     }
@@ -1142,10 +1142,10 @@
                     if (baseDatosFotos[albumActivo] && baseDatosFotos[albumActivo][h]) {
                         const nodo = baseDatosFotos[albumActivo][h];
                         if (nodo.fotoArriba && nodo.fotoArriba.img) {
-                            listaFotosCarrusel.push({ img: nodo.fotoArriba.img, text: nodo.fotoArriba.text, creador: albumActivo, hoja: h - 1 });
+                            listaFotosCarrusel.push({ img: nodo.fotoArriba.img, text: nodo.fotoArriba.text, creator: albumActivo, hoja: h - 1 });
                         }
                         if (nodo.fotoAbajo && nodo.fotoAbajo.img) {
-                            listaFotosCarrusel.push({ img: nodo.fotoAbajo.img, text: nodo.fotoAbajo.text, creador: albumActivo, hoja: h - 1 });
+                            listaFotosCarrusel.push({ img: nodo.fotoAbajo.img, text: nodo.fotoAbajo.text, creator: albumActivo, hoja: h - 1 });
                         }
                     }
                 }
@@ -1170,7 +1170,7 @@
             document.getElementById('imgModalZoomSrc').src = item.img;
             
             const textoComentario = item.text ? `"${item.text}"` : "(Sin comentario)";
-            const procedencia = albumActivo === "GENERAL" ? ` [Álbum de ${item.creador.toUpperCase()} - Hoja ${item.hoja}]` : ` [Hoja ${item.hoja}]`;
+            const procedencia = albumActivo === "GENERAL" ? ` [Álbum de ${item.creator.toUpperCase()} - Hoja ${item.hoja}]` : ` [Hoja ${item.hoja}]`;
             
             document.getElementById('textoPieZoom').innerText = `${textoComentario}${procedencia} (${indiceCarruselActual + 1} de ${listaFotosCarrusel.length})`;
         }
@@ -1190,12 +1190,22 @@
         function abrirMenuSelector(idMenu) { document.getElementById(idMenu).classList.remove('hidden'); }
 
         function asegurarEstructuraAlbum() {
-            if (!baseDatosFotos[albumActivo]) baseDatosFotos[albumActivo] = {};
+            if (!baseDatosFotos[albumActivo]) {
+                baseDatosFotos[albumActivo] = {};
+            }
             if (!baseDatosFotos[albumActivo][hojaActual]) {
                 baseDatosFotos[albumActivo][hojaActual] = {
                     fotoArriba: { img: "", text: "" },
                     fotoAbajo: { img: "", text: "" }
                 };
+            } else {
+                // Verificar que las propiedades internas existan para evitar colisiones
+                if (!baseDatosFotos[albumActivo][hojaActual].fotoArriba) {
+                    baseDatosFotos[albumActivo][hojaActual].fotoArriba = { img: "", text: "" };
+                }
+                if (!baseDatosFotos[albumActivo][hojaActual].fotoAbajo) {
+                    baseDatosFotos[albumActivo][hojaActual].fotoAbajo = { img: "", text: "" };
+                }
             }
         }
 
@@ -1206,7 +1216,6 @@
                 return;
             }
 
-            // Ocultar botón de añadir, menú y mostrar texto de "Cargando..."
             document.getElementById(labelId).style.display = "none";
             document.getElementById(menuId).classList.add('hidden');
             const elCargando = document.getElementById(cargandoId);
@@ -1215,7 +1224,7 @@
             const reader = new FileReader();
             
             reader.onerror = function() {
-                alert("⚠️ ERROR: El navegador no pudo leer el archivo físico. Inténtalo de nuevo con otra foto o una captura de pantalla.");
+                alert("⚠️ ERROR: El navegador no pudo leer el archivo físico. Inténtalo de nuevo.");
                 elCargando.style.display = "none";
                 document.getElementById(labelId).style.display = "flex";
             };
@@ -1224,7 +1233,7 @@
                 const img = new Image();
                 
                 img.onerror = function() {
-                    alert("⚠️ ALERTA FORMATO: El celular está usando un formato incompatible (como HEIC de alta eficiencia) o la imagen está corrupta. Intenta subiendo una captura de pantalla para confirmar.");
+                    alert("⚠️ ALERTA FORMATO: El formato no es compatible o está dañado. Intenta con un archivo JPG, PNG o GIF estándar.");
                     elCargando.style.display = "none";
                     document.getElementById(labelId).style.display = "flex";
                 };
@@ -1234,7 +1243,7 @@
                         const canvas = document.createElement('canvas');
                         let width = img.width;
                         let height = img.height;
-                        const max_size = 500; 
+                        const max_size = 600; 
 
                         if (width > height) {
                             if (width > max_size) { height *= max_size / width; width = max_size; }
@@ -1246,16 +1255,15 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        const base64Optimizado = canvas.toDataURL('image/jpeg', 0.6);
+                        const base64Optimizado = canvas.toDataURL('image/jpeg', 0.7);
                         
                         if (!base64Optimizado || base64Optimizado === "data:,") {
-                            throw new Error("El navegador web del móvil se quedó sin memoria para procesar esta foto.");
+                            throw new Error("El navegador web del móvil se quedó sin memoria para procesar la foto.");
                         }
 
                         asegurarEstructuraAlbum();
                         baseDatosFotos[albumActivo][hojaActual][posicionKey].img = base64Optimizado;
                         
-                        // Sincronizar a Firebase
                         await subirCambioFirebase(albumActivo, hojaActual, posicionKey, 'img', base64Optimizado);
 
                         const imgEl = document.getElementById(imgId);
@@ -1264,7 +1272,7 @@
                         
                         construirEstructuraCarrusel();
                     } catch (error) {
-                        alert("⚠️ ERROR DE PROCESAMIENTO: " + error.message + "\n\nSugerencia: Cierra pestañas del navegador o intenta con otra foto tomada desde más lejos.");
+                        alert("⚠️ ERROR DE PROCESAMIENTO: " + error.message);
                         document.getElementById(labelId).style.display = "flex";
                     } finally {
                         elCargando.style.display = "none";
