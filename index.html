@@ -16,7 +16,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-flex-start;
+            justify-content: flex-start;
             box-sizing: border-box;
         }
 
@@ -52,6 +52,12 @@
             margin-top: 10vh;
         }
 
+        .contenedor-input-password {
+            position: relative;
+            width: 100%;
+            margin: 10px 0;
+        }
+
         .campo-input {
             width: 100%;
             padding: 12px;
@@ -60,6 +66,28 @@
             border-radius: 8px;
             box-sizing: border-box;
             font-size: 14px;
+        }
+
+        .contenedor-input-password .campo-input {
+            margin: 0;
+            padding-right: 45px;
+        }
+
+        .btn-mostrar-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+            box-shadow: none;
+            color: #8c7355;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-ingresar {
@@ -151,20 +179,40 @@
             color: #8c7355;
             margin-bottom: 2px;
         }
-        .input-usuario-mini, .input-clave-mini {
+        .input-usuario-mini {
             padding: 6px;
             border: 1px solid #c8b9a6;
             border-radius: 6px;
             font-size: 12px;
             box-sizing: border-box;
-        }
-        .input-usuario-mini {
             width: 110px;
             background-color: #faf8f5;
             font-weight: bold;
         }
-        .input-clave-mini {
+        .contenedor-clave-mini {
+            position: relative;
             flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        .input-clave-mini {
+            width: 100%;
+            padding: 6px 30px 6px 6px;
+            border: 1px solid #c8b9a6;
+            border-radius: 6px;
+            font-size: 12px;
+            box-sizing: border-box;
+        }
+        .btn-mostrar-mini {
+            position: absolute;
+            right: 6px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 2px;
+            color: #8c7355;
+            box-shadow: none;
         }
         .btn-update-mini {
             background-color: #8c7355;
@@ -488,13 +536,20 @@
         <p id="subtituloApp">Un legado de amor para toda la familia</p>
     </header>
 
+    <!-- 1. FORMULARIO DE ACCESO -->
     <div id="pantallaLogin" class="tarjeta-login">
         <p style="color:#8c7355; font-style:italic; font-size:13px; margin:0 0 20px 0;">Ingresa tu usuario asignado</p>
         <input type="text" id="usuarioInput" class="campo-input" placeholder="Usuario">
-        <input type="password" id="claveInput" class="campo-input" placeholder="Contraseña">
+        
+        <div class="contenedor-input-password">
+            <input type="password" id="claveInput" class="campo-input" placeholder="Contraseña">
+            <button type="button" class="btn-mostrar-password" onclick="conmutarVisibilidad('claveInput', this)">👁️</button>
+        </div>
+        
         <button class="btn-ingresar" id="btnClickIngresar" onclick="autenticarUsuario()">Iniciar Sesión</button>
     </div>
 
+    <!-- 2. PANEL DINÁMICO ADAPTATIVO -->
     <div id="panelAdmin" class="panel-dashboard">
         <div class="encabezado-panel">
             <span id="mensajePanel" style="font-size:13px; font-weight:bold; color:#6c4724;"></span>
@@ -503,6 +558,7 @@
         
         <div id="contenedorTarjetas"></div>
 
+        <!-- SUBPANEL EXCLUSIVO PARA ADMINISTRADOR: GESTIÓN DE USUARIOS Y BACKUPS -->
         <div id="panelGestionClaves" class="seccion-gestion-claves hidden">
             <h4>⚙️ Administrar Usuarios y Contraseñas</h4>
             <div id="listaClavesUsuarios"></div>
@@ -516,15 +572,18 @@
         </div>
     </div>
 
+    <!-- 3. INTERFAZ INTERACTIVA DEL ÁLBUM -->
     <div id="interfazAlbum" class="album-area">
         <div class="libro-wrapper">
             <div class="libro">
                 
+                <!-- HOJA 0: PORTADA -->
                 <div id="hojaPortada" class="contenido-centro">
                     <div class="titulo-portada">Nuestra Familia,<br>Nuestros Recuerdos</div>
                     <div class="subtitulo-portada">Un viaje a través de los momentos más bellos.</div>
                 </div>
 
+                <!-- HOJA 1: DEDICATORIA -->
                 <div id="hojaDedicatoria" class="contenido-centro hidden">
                     <div class="texto-dedicatoria">
                         "Este álbum lo hago con mucho cariño para mis abuelos Emma y Emilio, también dedicado a mis tíos y mis primos hermanos."
@@ -535,8 +594,10 @@
                     </div>
                 </div>
 
+                <!-- HOJAS REGISTRO DE FOTOS (HASTA 1000 HOJAS) -->
                 <div id="hojaFotos" class="fotos-grid hidden">
                     
+                    <!-- FOTO SUPERIOR -->
                     <div class="foto-container">
                         <div class="foto-placeholder" id="label-f1" onclick="abrirMenuSelector('menu-f1')">
                             <span>📷 Toca para añadir foto superior</span>
@@ -557,6 +618,7 @@
                         <input type="text" class="pie-foto-input" placeholder="Escribe un recuerdo aquí..." id="pie-f1" oninput="guardarTexto('fotoArriba', this.value)">
                     </div>
                     
+                    <!-- FOTO INFERIOR -->
                     <div class="foto-container">
                         <div class="foto-placeholder" id="label-f2" onclick="abrirMenuSelector('menu-f2')">
                             <span>📷 Toca para añadir foto inferior</span>
@@ -583,6 +645,7 @@
             </div>
         </div>
 
+        <!-- BOTONES DE NAVEGACIÓN Y BUSCADOR -->
         <div class="controles">
             <button id="btnAnterior" onclick="navegar(-1)" disabled>←</button>
             
@@ -597,13 +660,14 @@
         </div>
     </div>
 
+    <!-- VENTANA MODAL PARA ZOOM DE FOTOGRAFÍAS -->
     <div id="modalZoom" class="modal-zoom" onclick="cerrarZoom()">
         <span class="close-zoom">&times;</span>
         <img id="imgModalZoomSrc" src="" alt="Zoom Recuerdo">
     </div>
 
     <script>
-        // CONFIGURACIÓN DE FÁBRICA ESTRICTA
+        // CONFIGURACIÓN DE CUENTAS BASE DEL SISTEMA
         const cuentasDefecto = {
             'jorge': { usuario: 'jorge', clave: 'admin2026', rol: 'admin', album: 'ADMIN' },
             'fabiola': { usuario: 'fabiola', clave: 'fabi123', rol: 'familia', album: 'FABIOLA QUEZADA' },
@@ -613,19 +677,7 @@
             'amelia': { usuario: 'amelia', clave: 'amelia123', rol: 'familia', album: 'AMELIA QUEZADA' }
         };
 
-        let bdCuentas = JSON.parse(localStorage.getItem('bd_album_cuentas_quezada_v2')) || cuentasDefecto;
-        
-        // CORRECCIÓN INMEDIATA DE RESIDUOS VIEJOS
-        if (bdCuentas['jorge.s'] || !bdCuentas['salomon']) {
-            bdCuentas['salomon'] = { 
-                usuario: 'salomon', 
-                clave: (bdCuentas['jorge.s'] && bdCuentas['jorge.s'].clave !== 'jorgeS123') ? bdCuentas['jorge.s'].clave : 'salomon123', 
-                rol: 'familia', 
-                album: 'SALOMÓN QUEZADA' 
-            };
-            delete bdCuentas['jorge.s'];
-            localStorage.setItem('bd_album_cuentas_quezada_v2', JSON.stringify(bdCuentas));
-        }
+        let bdCuentas = JSON.parse(localStorage.getItem('bd_album_cuentas_quezada_v3')) || cuentasDefecto;
 
         let usuarioLogueado = null;
         let albumActivo = ""; 
@@ -638,12 +690,23 @@
         document.getElementById('claveInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') { autenticarUsuario(); } });
         document.getElementById('inputBuscarHoja').addEventListener('keydown', function(e) { if (e.key === 'Enter') { saltarAPagina(); } });
 
+        // FUNCIÓN PARA MOSTRAR/OCULTAR CONTRASEÑA
+        function conmutarVisibilidad(idInput, boton) {
+            const elInput = document.getElementById(idInput);
+            if (elInput.type === "password") {
+                elInput.type = "text";
+                boton.innerText = "🔒";
+            } else {
+                elInput.type = "password";
+                boton.innerText = "👁️";
+            }
+        }
+
         function autenticarUsuario() {
             const userIngresado = document.getElementById('usuarioInput').value.trim().toLowerCase();
             const passIngresado = document.getElementById('claveInput').value.trim();
 
             let cuentaEncontrada = null;
-            // FLEXIBILIDAD ABSOLUTA EN MAYÚSCULAS/MINÚSCULAS
             for (let id in bdCuentas) {
                 if (bdCuentas[id].usuario.toLowerCase() === userIngresado && bdCuentas[id].clave === passIngresado) {
                     cuentaEncontrada = bdCuentas[id];
@@ -673,16 +736,14 @@
             contenedor.innerHTML = ""; 
 
             if (usuarioLogueado.rol === 'admin') {
-                mensaje.innerText = `Administrador: ${usuarioLogueado.usuario.toUpperCase()}`;
+                mensaje.innerText = `Panel del Administrador`;
                 
-                const ordenIDs = ['fabiola', 'luis', 'salomon', 'hortencia', 'amelia'];
-                ordenIDs.forEach(id => {
-                    if(bdCuentas[id]) {
+                for (let id in bdCuentas) {
+                    if (bdCuentas[id].rol !== 'admin') {
                         const deFamilia = bdCuentas[id];
                         contenedor.innerHTML += `<div class="tarjeta-familia" onclick="cargarAlbumActivo('${deFamilia.album}')"><h3>Álbum de ${deFamilia.usuario.toUpperCase()}</h3><span>Revisar →</span></div>`;
                     }
-                });
-
+                }
                 subpanelClaves.classList.remove('hidden');
                 renderizarListaClaves();
             } else {
@@ -710,26 +771,25 @@
         function renderizarListaClaves() {
             const listaContenedor = document.getElementById('listaClavesUsuarios');
             listaContenedor.innerHTML = "";
-
-            const ordenUsuarios = ['jorge', 'fabiola', 'luis', 'salomon', 'hortencia', 'amelia'];
             
-            ordenUsuarios.forEach(idKey => {
-                if(bdCuentas[idKey]) {
-                    const cuenta = bdCuentas[idKey];
-                    const esAdmin = cuenta.rol === 'admin';
-                    
-                    listaContenedor.innerHTML += `
-                        <div class="fila-usuario">
-                            <div class="label-usuario-fijo">CUENTA ORIGINAL: ${idKey.toUpperCase()}${esAdmin ? ' (Tú)' : ''}</div>
-                            <div class="fila-usuario-inputs">
-                                <input type="text" id="user-input-${idKey}" class="input-usuario-mini" value="${cuenta.usuario}" placeholder="Usuario">
-                                <input type="text" id="pass-input-${idKey}" class="input-clave-mini" value="${cuenta.clave}" placeholder="Contraseña">
-                                <button class="btn-update-mini" onclick="guardarDatosCuenta('${idKey}')">💾 Guardar</button>
+            for (let idKey in bdCuentas) {
+                const cuenta = bdCuentas[idKey];
+                const esAdmin = cuenta.rol === 'admin';
+                
+                listaContenedor.innerHTML += `
+                    <div class="fila-usuario">
+                        <div class="label-usuario-fijo">CUENTA REGISTRADA: ${idKey.toUpperCase()}${esAdmin ? ' (Tú)' : ''}</div>
+                        <div class="fila-usuario-inputs">
+                            <input type="text" id="user-input-${idKey}" class="input-usuario-mini" value="${cuenta.usuario}" placeholder="Usuario">
+                            <div class="contenedor-clave-mini">
+                                <input type="password" id="pass-input-${idKey}" class="input-clave-mini" value="${cuenta.clave}" placeholder="Contraseña">
+                                <button type="button" class="btn-mostrar-mini" onclick="conmutarVisibilidad('pass-input-${idKey}', this)">👁️</button>
                             </div>
+                            <button class="btn-update-mini" onclick="guardarDatosCuenta('${idKey}')">💾 Guardar</button>
                         </div>
-                    `;
-                }
-            });
+                    </div>
+                `;
+            }
         }
 
         function guardarDatosCuenta(idKey) {
@@ -737,25 +797,28 @@
             const nuevaClave = document.getElementById(`pass-input-${idKey}`).value.trim();
             
             if(nuevoUser === "" || nuevaClave === "") {
-                alert("Ni el usuario ni la contraseña pueden estar vacíos.");
+                alert("Ningún campo puede estar vacío.");
                 return;
             }
 
+            // Validar que no se repita el nombre de usuario modificado
             for(let id in bdCuentas) {
                 if(id !== idKey && bdCuentas[id].usuario.toLowerCase() === nuevoUser) {
-                    alert(`El nombre de usuario "${nuevoUser}" ya lo está usando otra persona.`);
+                    alert(`El nombre de usuario "${nuevoUser}" ya existe.`);
                     return;
                 }
             }
 
+            // Aplicar cambios directos sobre la clave del objeto sin perder la referencia
             bdCuentas[idKey].usuario = nuevoUser;
             bdCuentas[idKey].clave = nuevaClave;
-            if(idKey !== 'jorge') {
+            
+            if(bdCuentas[idKey].rol !== 'admin') {
                 bdCuentas[idKey].album = nuevoUser.toUpperCase() + " QUEZADA";
             }
             
-            localStorage.setItem('bd_album_cuentas_quezada_v2', JSON.stringify(bdCuentas));
-            alert(`¡Cuenta de ${idKey.toUpperCase()} guardada con éxito!`);
+            localStorage.setItem('bd_album_cuentas_quezada_v3', JSON.stringify(bdCuentas));
+            alert("¡Cambios guardados con éxito!");
             
             generarPanelControl();
         }
@@ -783,15 +846,15 @@
                         localStorage.setItem('bd_album_familiar_quezada', JSON.stringify(baseDatosFotos));
                         if (dataImportada.cuentas) {
                             bdCuentas = dataImportada.cuentas;
-                            localStorage.setItem('bd_album_cuentas_quezada_v2', JSON.stringify(bdCuentas));
+                            localStorage.setItem('bd_album_cuentas_quezada_v3', JSON.stringify(bdCuentas));
                         }
                         alert("¡Copia de seguridad restaurada!");
                         location.reload();
                     } else {
-                        alert("Formato incorrecto.");
+                        alert("Formato de archivo inválido.");
                     }
                 } catch (error) {
-                    alert("Error al importar.");
+                    alert("Error al importar la copia.");
                 }
             };
             reader.readAsText(file);
@@ -843,7 +906,7 @@
         function saltarAPagina() {
             const numeroHoja = parseInt(document.getElementById('inputBuscarHoja').value);
             if (isNaN(numeroHoja) || numeroHoja < 1 || numeroHoja > 1000) {
-                alert("Por favor ingresa un número de hoja válido entre 1 y 1000.");
+                alert("Ingresa un número de hoja válido (1 a 1000).");
                 return;
             }
             hojaActual = numeroHoja + 1;
