@@ -651,7 +651,7 @@
             'amelia': { usuario: 'amelia', clave: 'amelia123', rol: 'familia', album: 'AMELIA QUEZADA' }
         };
 
-        let bdCuentas = JSON.parse(localStorage.getItem('bd_album_cuentas_quezada_v3')) || cuentasDefecto;
+        let bdCuentas = cuentasDefecto;
 
         let usuarioLogueado = null;
         let albumActivo = ""; 
@@ -660,7 +660,7 @@
 
         let baseDatosFotos = {};
 
-        // Sincronizar remotamente toda la base de datos al iniciar la página
+        // Sincronizar remotamente toda la base de datos de fotos al iniciar la página
         async function descargarDatosFirebase() {
             try {
                 const respuesta = await fetch(URL_FIREBASE + "baseDatosFotos.json");
@@ -675,7 +675,30 @@
             }
         }
 
-        // Subir cambios individuales directamente a internet
+        // Sincronizar las cuentas de usuario directamente desde Firebase
+        async function descargarCuentasFirebase() {
+            try {
+                const respuesta = await fetch(URL_FIREBASE + "bdCuentas.json");
+                const datos = await respuesta.json();
+                if (datos) {
+                    bdCuentas = datos;
+                    localStorage.setItem('bd_album_cuentas_quezada_v3', JSON.stringify(bdCuentas));
+                } else {
+                    // Si Firebase está vacío, subir las cuentas por defecto
+                    await fetch(URL_FIREBASE + "bdCuentas.json", {
+                        method: 'PUT',
+                        body: JSON.stringify(cuentasDefecto)
+                    });
+                    bdCuentas = cuentasDefecto;
+                }
+            } catch (error) {
+                console.error("Error al descargar cuentas de Firebase:", error);
+                // Si falla la red, usar respaldo local
+                bdCuentas = JSON.parse(localStorage.getItem('bd_album_cuentas_quezada_v3')) || cuentasDefecto;
+            }
+        }
+
+        // Subir cambios individuales de fotos directamente a internet
         async function subirCambioFirebase(album, hoja, posicion, claveContenido, valor) {
             try {
                 await fetch(`${URL_FIREBASE}baseDatosFotos/${album}/${hoja}/${posicion}/${claveContenido}.json`, {
@@ -687,8 +710,13 @@
             }
         }
 
-        // Cargar datos por primera vez al abrir la aplicación
-        descargarDatosFirebase();
+        // Cargar todos los datos desde internet de manera inicial
+        async function inicializarAplicacion() {
+            await descargarCuentasFirebase();
+            await descargarDatosFirebase();
+        }
+
+        inicializarAplicacion();
 
         document.getElementById('usuarioInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') { autenticarUsuario(); } });
         document.getElementById('claveInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') { autenticarUsuario(); } });
@@ -739,7 +767,7 @@
             contenedor.innerHTML = ""; 
 
             if (usuarioLogueado.rol === 'admin') {
-                mensaje.innerText = `Panel del Administrador`;
+                mensaje.innerText = `Panel del Administrator`;
                 
                 for (let id in bdCuentas) {
                     if (bdCuentas[id].rol !== 'admin') {
@@ -795,7 +823,8 @@
             }
         }
 
-        function guardarDatosCuenta(idKey) {
+        // CORRECCIÓN CLAVE: GUARDAR EN FIREBASE DIRECTAMENTE LAS NUEVAS CREDENCIALES
+        async function guardarDatosCuenta(idKey) {
             const nuevoUser = document.getElementById(`user-input-${idKey}`).value.trim().toLowerCase();
             const nuevaClave = document.getElementById(`pass-input-${idKey}`).value.trim();
             
@@ -811,6 +840,7 @@
                 }
             }
 
+            // Aplicar cambios en la estructura local
             bdCuentas[idKey].usuario = nuevoUser;
             bdCuentas[idKey].clave = nuevaClave;
             
@@ -818,9 +848,20 @@
                 bdCuentas[idKey].album = nuevoUser.toUpperCase() + " QUEZADA";
             }
             
-            localStorage.setItem('bd_album_cuentas_quezada_v3', JSON.stringify(bdCuentas));
-            alert("¡Cambios guardados con éxito!");
-            generarPanelControl();
+            try {
+                // GUARDAR EN INTERNET (FIREBASE)
+                await fetch(URL_FIREBASE + "bdCuentas.json", {
+                    method: 'PUT',
+                    body: JSON.stringify(bdCuentas)
+                });
+                
+                localStorage.setItem('bd_album_cuentas_quezada_v3', JSON.stringify(bdCuentas));
+                alert("¡Cambios de usuario y contraseña guardados en internet con éxito!");
+                generarPanelControl();
+            } catch (error) {
+                console.error("Error al guardar cuentas en Firebase:", error);
+                alert("No se pudo guardar en la nube. Verifica tu conexión.");
+            }
         }
 
         function exportarCopiaSeguridad() {
@@ -844,7 +885,6 @@
                     if (dataImportada.fotosYTextos) {
                         baseDatosFotos = dataImportada.fotosYTextos;
                         
-                        // Guardar la copia importada completa directamente en Firebase
                         await fetch(URL_FIREBASE + "baseDatosFotos.json", {
                             method: 'PUT',
                             body: JSON.stringify(baseDatosFotos)
@@ -852,6 +892,10 @@
 
                         if (dataImportada.cuentas) {
                             bdCuentas = dataImportada.cuentas;
+                            await fetch(URL_FIREBASE + "bdCuentas.json", {
+                                method: 'PUT',
+                                body: JSON.stringify(bdCuentas)
+                            });
                             localStorage.setItem('bd_album_cuentas_quezada_v3', JSON.stringify(bdCuentas));
                         }
                         alert("¡Copia de seguridad restaurada e introducida en Firebase con éxito!");
