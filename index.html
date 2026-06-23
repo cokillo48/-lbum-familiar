@@ -529,28 +529,62 @@
         .hidden { display: none !important; }
         input[type="file"] { display: none; }
 
-        /* VISOR MODAL PARA ZOOM DE FOTOS */
+        /* VISOR MODAL PARA ZOOM DE FOTOS CON BOTONES DE AVANCE CONTINUO */
         .modal-zoom {
             display: none;
             position: fixed;
             z-index: 1000;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.9);
+            background-color: rgba(0,0,0,0.92);
             align-items: center;
             justify-content: center;
         }
         .modal-zoom img {
-            max-width: 95%;
-            max-height: 85%;
+            max-width: 85%;
+            max-height: 75%;
             object-fit: contain;
             border: 4px solid white;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .close-zoom {
             position: absolute;
-            top: 20px; right: 25px;
-            color: white; font-size: 35px; font-weight: bold;
+            top: 15px; right: 20px;
+            color: #fff; font-size: 38px; font-weight: bold;
             cursor: pointer;
+            z-index: 1010;
+        }
+        .flecha-zoom {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(108, 71, 36, 0.7);
+            color: white;
+            border: none;
+            font-size: 24px;
+            padding: 15px 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1010;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            user-select: none;
+            width: auto;
+            flex: none;
+        }
+        .flecha-zoom:active { background-color: rgba(108, 71, 36, 0.9); }
+        .flecha-zoom.izq { left: 15px; }
+        .flecha-zoom.der { right: 15px; }
+        
+        .pie-zoom-texto {
+            position: absolute;
+            bottom: 30px;
+            left: 5%;
+            width: 90%;
+            text-align: center;
+            color: #f5efe6;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-size: 15px;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
         }
     </style>
 </head>
@@ -633,9 +667,13 @@
         </div>
     </div>
 
-    <div id="modalZoom" class="modal-zoom" onclick="cerrarZoom()">
-        <span class="close-zoom">&times;</span>
+    <!-- VISOR EN ZOOM MEJORADO CON SEGUIDOR Y FLECHAS DE AVANCE CONTINUO -->
+    <div id="modalZoom" class="modal-zoom">
+        <span class="close-zoom" onclick="cerrarZoom()">&times;</span>
+        <button class="flecha-zoom izq" onclick="cambiarFotoZoom(-1)">←</button>
         <img id="imgModalZoomSrc" src="" alt="Zoom Recuerdo">
+        <button class="flecha-zoom der" onclick="cambiarFotoZoom(1)">→</button>
+        <div id="textoPieZoom" class="pie-zoom-texto"></div>
     </div>
 
     <script>
@@ -652,30 +690,26 @@
         };
 
         let bdCuentas = cuentasDefecto;
-
         let usuarioLogueado = null;
         let albumActivo = ""; 
         let hojaActual = 0; 
         const totalHojas = 1002; 
-
         let baseDatosFotos = {};
 
-        // Sincronizar remotamente toda la base de datos de fotos al iniciar la página
+        // Variables para controlar el carrusel continuo dentro del zoom
+        let listaFotosCarrusel = [];
+        let indiceCarruselActual = -1;
+
         async function descargarDatosFirebase() {
             try {
                 const respuesta = await fetch(URL_FIREBASE + "baseDatosFotos.json");
                 const datos = await respuesta.json();
-                if (datos) {
-                    baseDatosFotos = datos;
-                } else {
-                    baseDatosFotos = {};
-                }
+                baseDatosFotos = datos ? datos : {};
             } catch (error) {
                 console.error("Error al sincronizar con Firebase:", error);
             }
         }
 
-        // Sincronizar las cuentas de usuario directamente desde Firebase
         async function descargarCuentasFirebase() {
             try {
                 const respuesta = await fetch(URL_FIREBASE + "bdCuentas.json");
@@ -684,7 +718,6 @@
                     bdCuentas = datos;
                     localStorage.setItem('bd_album_cuentas_quezada_v3', JSON.stringify(bdCuentas));
                 } else {
-                    // Si Firebase está vacío, subir las cuentas por defecto
                     await fetch(URL_FIREBASE + "bdCuentas.json", {
                         method: 'PUT',
                         body: JSON.stringify(cuentasDefecto)
@@ -693,12 +726,10 @@
                 }
             } catch (error) {
                 console.error("Error al descargar cuentas de Firebase:", error);
-                // Si falla la red, usar respaldo local
                 bdCuentas = JSON.parse(localStorage.getItem('bd_album_cuentas_quezada_v3')) || cuentasDefecto;
             }
         }
 
-        // Subir cambios individuales de fotos directamente a internet
         async function subirCambioFirebase(album, hoja, posicion, claveContenido, valor) {
             try {
                 await fetch(`${URL_FIREBASE}baseDatosFotos/${album}/${hoja}/${posicion}/${claveContenido}.json`, {
@@ -710,7 +741,6 @@
             }
         }
 
-        // Cargar todos los datos desde internet de manera inicial
         async function inicializarAplicacion() {
             await descargarCuentasFirebase();
             await descargarDatosFirebase();
@@ -767,7 +797,7 @@
             contenedor.innerHTML = ""; 
 
             if (usuarioLogueado.rol === 'admin') {
-                mensaje.innerText = `Panel del Administrator`;
+                mensaje.innerText = `Panel del Administrador`;
                 
                 for (let id in bdCuentas) {
                     if (bdCuentas[id].rol !== 'admin') {
@@ -823,7 +853,6 @@
             }
         }
 
-        // CORRECCIÓN CLAVE: GUARDAR EN FIREBASE DIRECTAMENTE LAS NUEVAS CREDENCIALES
         async function guardarDatosCuenta(idKey) {
             const nuevoUser = document.getElementById(`user-input-${idKey}`).value.trim().toLowerCase();
             const nuevaClave = document.getElementById(`pass-input-${idKey}`).value.trim();
@@ -840,7 +869,6 @@
                 }
             }
 
-            // Aplicar cambios en la estructura local
             bdCuentas[idKey].usuario = nuevoUser;
             bdCuentas[idKey].clave = nuevaClave;
             
@@ -849,18 +877,16 @@
             }
             
             try {
-                // GUARDAR EN INTERNET (FIREBASE)
                 await fetch(URL_FIREBASE + "bdCuentas.json", {
                     method: 'PUT',
                     body: JSON.stringify(bdCuentas)
                 });
                 
                 localStorage.setItem('bd_album_cuentas_quezada_v3', JSON.stringify(bdCuentas));
-                alert("¡Cambios de usuario y contraseña guardados en internet con éxito!");
+                alert("¡Cambios guardados en internet con éxito!");
                 generarPanelControl();
             } catch (error) {
-                console.error("Error al guardar cuentas en Firebase:", error);
-                alert("No se pudo guardar en la nube. Verifica tu conexión.");
+                alert("No se pudo guardar en la nube.");
             }
         }
 
@@ -898,13 +924,11 @@
                             });
                             localStorage.setItem('bd_album_cuentas_quezada_v3', JSON.stringify(bdCuentas));
                         }
-                        alert("¡Copia de seguridad restaurada e introducida en Firebase con éxito!");
+                        alert("¡Copia de seguridad restaurada con éxito!");
                         location.reload();
-                    } else {
-                        alert("Formato de archivo inválido.");
                     }
                 } catch (error) {
-                    alert("Error al importar la copia.");
+                    alert("Error al importar.");
                 }
             };
             reader.readAsText(file);
@@ -924,8 +948,8 @@
             document.getElementById('interfazAlbum').style.display = 'flex';
             hojaActual = 0;
             
-            // Forzar actualización de datos frescos antes de pintar las hojas
             await descargarDatosFirebase();
+            construirEstructuraCarrusel(); // Compilar el índice global de fotos para las flechas del Zoom
             navegar(0);
         }
 
@@ -977,7 +1001,7 @@
             navegar(0);
         }
 
-        // --- RENDERIZADO DEL ÁLBUM INDIVIDUAL ---
+        // --- RENDERIZADO ÁLBUM INDIVIDUAL ---
         function renderizarAlbumIndividual() {
             const contenedor = document.getElementById('hojaFotos');
             
@@ -1029,7 +1053,7 @@
             `;
         }
 
-        // --- COMPILACIÓN VISUAL EN ÁLBUM GENERAL ---
+        // --- RENDERIZADO ÁLBUM GENERAL ---
         function renderizarAlbumGeneral() {
             const contenedor = document.getElementById('hojaFotos');
             contenedor.innerHTML = ""; 
@@ -1079,14 +1103,89 @@
             }
         }
 
-        function abrirZoomImagen(srcBase64) {
-            if(srcBase64) {
-                document.getElementById('imgModalZoomSrc').src = srcBase64;
-                document.getElementById('modalZoom').style.display = "flex";
+        // --- SISTEMA INTERACTIVO DE DIAPOSITIVAS / CARRUSEL PARA EL ZOOM ---
+        function construirEstructuraCarrusel() {
+            listaFotosCarrusel = []; 
+            
+            if (albumActivo === "GENERAL") {
+                // El carrusel recopila las fotos de todos los familiares de forma cronológica por página
+                for (let h = 2; h < totalHojas; h++) {
+                    for (let id in bdCuentas) {
+                        const alb = bdCuentas[id].album;
+                        if (!alb || bdCuentas[id].rol === 'admin') continue;
+                        
+                        if (baseDatosFotos[alb] && baseDatosFotos[alb][h]) {
+                            const nodo = baseDatosFotos[alb][h];
+                            if (nodo.fotoArriba && nodo.fotoArriba.img) {
+                                listaFotosCarrusel.push({ img: nodo.fotoArriba.img, text: nodo.fotoArriba.text, creador: bdCuentas[id].usuario, hoja: h - 1 });
+                            }
+                            if (nodo.fotoAbajo && nodo.fotoAbajo.img) {
+                                listaFotosCarrusel.push({ img: nodo.fotoAbajo.img, text: nodo.fotoAbajo.text, creador: bdCuentas[id].usuario, hoja: h - 1 });
+                            }
+                        }
+                    }
+                }
+            } else {
+                // El carrusel recopila de manera continua solo las fotos de este álbum personal
+                for (let h = 2; h < totalHojas; h++) {
+                    if (baseDatosFotos[albumActivo] && baseDatosFotos[albumActivo][h]) {
+                        const nodo = baseDatosFotos[albumActivo][h];
+                        if (nodo.fotoArriba && nodo.fotoArriba.img) {
+                            listaFotosCarrusel.push({ img: nodo.fotoArriba.img, text: nodo.fotoArriba.text, creador: albumActivo, hoja: h - 1 });
+                        }
+                        if (nodo.fotoAbajo && nodo.fotoAbajo.img) {
+                            listaFotosCarrusel.push({ img: nodo.fotoAbajo.img, text: nodo.fotoAbajo.text, creador: albumActivo, hoja: h - 1 });
+                        }
+                    }
+                }
             }
         }
 
-        function cerrarZoom() { document.getElementById('modalZoom').style.display = "none"; }
+        function abrirZoomImagen(srcBase64) {
+            if (!srcBase64) return;
+            
+            // Re-construir dinámicamente por si agregaron fotos nuevas justo antes
+            construirEstructuraCarrusel();
+            
+            // Buscar en qué posición del carrusel está la foto cliqueada
+            indiceCarruselActual = listaFotosCarrusel.findIndex(f => f.img === srcBase64);
+            
+            document.getElementById('modalZoom').style.display = "flex";
+            actualizarVistaZoom();
+        }
+
+        function actualizarVistaZoom() {
+            if (indiceCarruselActual === -1 || listaFotosCarrusel.length === 0) {
+                // Respaldo por si se abre una imagen huérfana
+                document.getElementById('textoPieZoom').innerText = "";
+                return;
+            }
+
+            const item = listaFotosCarrusel[indiceCarruselActual];
+            document.getElementById('imgModalZoomSrc').src = item.img;
+            
+            const textoComentario = item.text ? `"${item.text}"` : "(Sin comentario)";
+            const procedencia = albumActivo === "GENERAL" ? ` [Álbum de ${item.creador.toUpperCase()} - Hoja ${item.hoja}]` : ` [Hoja ${item.hoja}]`;
+            
+            document.getElementById('textoPieZoom').innerText = `${textoComentario}${procedencia} (${indiceCarruselActual + 1} de ${listaFotosCarrusel.length})`;
+        }
+
+        function cambiarFotoZoom(direccion) {
+            if (listaFotosCarrusel.length === 0) return;
+            
+            indiceCarruselActual += direccion;
+            
+            // Ciclo continuo infinito (si llega al final, regresa a la primera, y viceversa)
+            if (indiceCarruselActual < 0) indiceCarruselActual = listaFotosCarrusel.length - 1;
+            if (indiceCarruselActual >= listaFotosCarrusel.length) indiceCarruselActual = 0;
+            
+            actualizarVistaZoom();
+        }
+
+        function cerrarZoom() { 
+            document.getElementById('modalZoom').style.display = "none"; 
+        }
+
         function abrirMenuSelector(idMenu) { document.getElementById(idMenu).classList.remove('hidden'); }
 
         function asegurarEstructuraAlbum() {
@@ -1130,7 +1229,6 @@
                     
                     baseDatosFotos[albumActivo][hojaActual][posicionKey].img = base64Optimizado;
                     
-                    // Subir la foto en tiempo real a Firebase
                     subirCambioFirebase(albumActivo, hojaActual, posicionKey, 'img', base64Optimizado);
 
                     const imgEl = document.getElementById(imgId);
@@ -1139,6 +1237,9 @@
                     imgEl.style.display = "block";
                     labelEl.style.display = "none";
                     document.getElementById(menuId).classList.add('hidden');
+                    
+                    // Actualizar el orden de las diapositivas
+                    construirEstructuraCarrusel();
                 };
                 img.src = e.target.result;
             };
@@ -1149,8 +1250,6 @@
         function guardarTexto(posicionKey, valor) {
             asegurarEstructuraAlbum();
             baseDatosFotos[albumActivo][hojaActual][posicionKey].text = valor;
-            
-            // Subir el texto en tiempo real a Firebase
             subirCambioFirebase(albumActivo, hojaActual, posicionKey, 'text', valor);
         }
     </script>
