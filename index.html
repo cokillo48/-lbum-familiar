@@ -639,6 +639,9 @@
     </div>
 
     <script>
+        // URL DE ENLACE DIRECTO A TU FIREBASE REALTIME DATABASE
+        const URL_FIREBASE = "https://albumquezada-default-rtdb.firebaseio.com/";
+
         const cuentasDefecto = {
             'jorge': { usuario: 'jorge', clave: 'admin2026', rol: 'admin', album: 'ADMIN' },
             'fabiola': { usuario: 'fabiola', clave: 'fabi123', rol: 'familia', album: 'FABIOLA QUEZADA' },
@@ -655,7 +658,37 @@
         let hojaActual = 0; 
         const totalHojas = 1002; 
 
-        let baseDatosFotos = JSON.parse(localStorage.getItem('bd_album_familiar_quezada')) || {};
+        let baseDatosFotos = {};
+
+        // Sincronizar remotamente toda la base de datos al iniciar la página
+        async function descargarDatosFirebase() {
+            try {
+                const respuesta = await fetch(URL_FIREBASE + "baseDatosFotos.json");
+                const datos = await respuesta.json();
+                if (datos) {
+                    baseDatosFotos = datos;
+                } else {
+                    baseDatosFotos = {};
+                }
+            } catch (error) {
+                console.error("Error al sincronizar con Firebase:", error);
+            }
+        }
+
+        // Subir cambios individuales directamente a internet
+        async function subirCambioFirebase(album, hoja, posicion, claveContenido, valor) {
+            try {
+                await fetch(`${URL_FIREBASE}baseDatosFotos/${album}/${hoja}/${posicion}/${claveContenido}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify(valor)
+                });
+            } catch (error) {
+                console.error("Error al subir dato a Firebase:", error);
+            }
+        }
+
+        // Cargar datos por primera vez al abrir la aplicación
+        descargarDatosFirebase();
 
         document.getElementById('usuarioInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') { autenticarUsuario(); } });
         document.getElementById('claveInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') { autenticarUsuario(); } });
@@ -801,21 +834,27 @@
             downloadAnchor.remove();
         }
 
-        function importarCopiaSeguridad(input) {
+        async function importarCopiaSeguridad(input) {
             const file = input.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const dataImportada = JSON.parse(e.target.result);
                     if (dataImportada.fotosYTextos) {
                         baseDatosFotos = dataImportada.fotosYTextos;
-                        localStorage.setItem('bd_album_familiar_quezada', JSON.stringify(baseDatosFotos));
+                        
+                        // Guardar la copia importada completa directamente en Firebase
+                        await fetch(URL_FIREBASE + "baseDatosFotos.json", {
+                            method: 'PUT',
+                            body: JSON.stringify(baseDatosFotos)
+                        });
+
                         if (dataImportada.cuentas) {
                             bdCuentas = dataImportada.cuentas;
                             localStorage.setItem('bd_album_cuentas_quezada_v3', JSON.stringify(bdCuentas));
                         }
-                        alert("¡Copia de seguridad restaurada!");
+                        alert("¡Copia de seguridad restaurada e introducida en Firebase con éxito!");
                         location.reload();
                     } else {
                         alert("Formato de archivo inválido.");
@@ -827,7 +866,7 @@
             reader.readAsText(file);
         }
 
-        function cargarAlbumActivo(nombreAlbum) {
+        async function cargarAlbumActivo(nombreAlbum) {
             albumActivo = nombreAlbum;
             const wrapper = document.getElementById('wrapperLibro');
             
@@ -840,6 +879,9 @@
             document.getElementById('panelAdmin').style.display = 'none';
             document.getElementById('interfazAlbum').style.display = 'flex';
             hojaActual = 0;
+            
+            // Forzar actualización de datos frescos antes de pintar las hojas
+            await descargarDatosFirebase();
             navegar(0);
         }
 
@@ -891,22 +933,20 @@
             navegar(0);
         }
 
-        // --- RENDERIZADO DEL ÁLBUM INDIVIDUAL (O VISTA DEL ADMIN) ---
+        // --- RENDERIZADO DEL ÁLBUM INDIVIDUAL ---
         function renderizarAlbumIndividual() {
             const contenedor = document.getElementById('hojaFotos');
             
-            // Traer datos guardados o vacío por defecto
             const data = (baseDatosFotos[albumActivo] && baseDatosFotos[albumActivo][hojaActual]) ? 
                           baseDatosFotos[albumActivo][hojaActual] : 
                           { fotoArriba: { img: "", text: "" }, fotoAbajo: { img: "", text: "" } };
 
-            // Determinar si quien mira puede editar (Solo el dueño del álbum puede editar, Admin solo VISUALIZA si ve el de otros)
             const esDueno = (usuarioLogueado.album === albumActivo);
             const deshabilitarInput = esDueno ? "" : "disabled style='border-bottom:none; font-weight:bold;'";
 
             contenedor.innerHTML = `
                 <div class="foto-container">
-                    <div class="foto-placeholder" id="label-f1" onclick="${esDueno ? "abrirMenuSelector('menu-f1')" : ""}" style="${data.fotoArriba.img ? 'display:none;' : 'display:flex;'}">
+                    <div class="foto-placeholder" id="label-f1" onclick="${esDueno ? "abrirMenuSelector('menu-f1')" : ""}" style="${data.fotoArriba && data.fotoArriba.img ? 'display:none;' : 'display:flex;'}">
                         <span>${esDueno ? '📷 Toca para añadir foto superior' : '🔒 Sin fotografía cargada'}</span>
                     </div>
                     ${esDueno ? `
@@ -920,12 +960,12 @@
                             <input type="file" id="gal-input-f1" accept="image/*" onchange="procesarYComprimirFoto(this, 'img-f1', 'label-f1', 'menu-f1', 'fotoArriba')">
                         </div>
                     </div>` : ''}
-                    <img id="img-f1" class="preview-img" src="${data.fotoArriba.img || ''}" style="${data.fotoArriba.img ? 'display:block;' : 'display:none;'}" onclick="abrirZoomImagen('${data.fotoArriba.img || ''}')">
-                    <input type="text" class="pie-foto-input" placeholder="${esDueno ? 'Escribe un recuerdo aquí...' : ''}" id="pie-f1" value="${data.fotoArriba.text || ''}" oninput="guardarTexto('fotoArriba', this.value)" ${deshabilitarInput}>
+                    <img id="img-f1" class="preview-img" src="${(data.fotoArriba && data.fotoArriba.img) || ''}" style="${data.fotoArriba && data.fotoArriba.img ? 'display:block;' : 'display:none;'}" onclick="abrirZoomImagen('${(data.fotoArriba && data.fotoArriba.img) || ''}')">
+                    <input type="text" class="pie-foto-input" placeholder="${esDueno ? 'Escribe un recuerdo aquí...' : ''}" id="pie-f1" value="${(data.fotoArriba && data.fotoArriba.text) || ''}" oninput="guardarTexto('fotoArriba', this.value)" ${deshabilitarInput}>
                 </div>
                 
                 <div class="foto-container">
-                    <div class="foto-placeholder" id="label-f2" onclick="${esDueno ? "abrirMenuSelector('menu-f2')" : ""}" style="${data.fotoAbajo.img ? 'display:none;' : 'display:flex;'}">
+                    <div class="foto-placeholder" id="label-f2" onclick="${esDueno ? "abrirMenuSelector('menu-f2')" : ""}" style="${data.fotoAbajo && data.fotoAbajo.img ? 'display:none;' : 'display:flex;'}">
                         <span>${esDueno ? '📷 Toca para añadir foto inferior' : '🔒 Sin fotografía cargada'}</span>
                     </div>
                     ${esDueno ? `
@@ -939,25 +979,23 @@
                             <input type="file" id="gal-input-f2" accept="image/*" onchange="procesarYComprimirFoto(this, 'img-f2', 'label-f2', 'menu-f2', 'fotoAbajo')">
                         </div>
                     </div>` : ''}
-                    <img id="img-f2" class="preview-img" src="${data.fotoAbajo.img || ''}" style="${data.fotoAbajo.img ? 'display:block;' : 'display:none;'}" onclick="abrirZoomImagen('${data.fotoAbajo.img || ''}')">
-                    <input type="text" class="pie-foto-input" placeholder="${esDueno ? 'Escribe un recuerdo aquí...' : ''}" id="pie-f2" value="${data.fotoAbajo.text || ''}" oninput="guardarTexto('fotoAbajo', this.value)" ${deshabilitarInput}>
+                    <img id="img-f2" class="preview-img" src="${(data.fotoAbajo && data.fotoAbajo.img) || ''}" style="${data.fotoAbajo && data.fotoAbajo.img ? 'display:block;' : 'display:none;'}" onclick="abrirZoomImagen('${(data.fotoAbajo && data.fotoAbajo.img) || ''}')">
+                    <input type="text" class="pie-foto-input" placeholder="${esDueno ? 'Escribe un recuerdo aquí...' : ''}" id="pie-f2" value="${(data.fotoAbajo && data.fotoAbajo.text) || ''}" oninput="guardarTexto('fotoAbajo', this.value)" ${deshabilitarInput}>
                 </div>
             `;
         }
 
-        // --- REGLA 2: COMPILACIÓN VISUAL AUTOMÁTICA EN ÁLBUM GENERAL ---
+        // --- COMPILACIÓN VISUAL EN ÁLBUM GENERAL ---
         function renderizarAlbumGeneral() {
             const contenedor = document.getElementById('hojaFotos');
-            contenedor.innerHTML = ""; // Limpiar hoja
+            contenedor.innerHTML = ""; 
 
             let totalRecuerdosEncontrados = 0;
 
-            // Recorrer las cuentas de todos los miembros de la familia
             for (let id in bdCuentas) {
                 const nombreAlbumFamiliar = bdCuentas[id].album;
                 if (bdCuentas[id].rol === 'admin' || !nombreAlbumFamiliar) continue;
 
-                // Extraer lo guardado para este miembro en esta misma hoja precisa
                 const datosMiembro = (baseDatosFotos[nombreAlbumFamiliar] && baseDatosFotos[nombreAlbumFamiliar][hojaActual]) ? 
                                       baseDatosFotos[nombreAlbumFamiliar][hojaActual] : null;
 
@@ -1045,8 +1083,11 @@
 
                     const base64Optimizado = canvas.toDataURL('image/jpeg', 0.6);
                     asegurarEstructuraAlbum();
+                    
                     baseDatosFotos[albumActivo][hojaActual][posicionKey].img = base64Optimizado;
-                    localStorage.setItem('bd_album_familiar_quezada', JSON.stringify(baseDatosFotos));
+                    
+                    // Subir la foto en tiempo real a Firebase
+                    subirCambioFirebase(albumActivo, hojaActual, posicionKey, 'img', base64Optimizado);
 
                     const imgEl = document.getElementById(imgId);
                     const labelEl = document.getElementById(labelId);
@@ -1064,7 +1105,9 @@
         function guardarTexto(posicionKey, valor) {
             asegurarEstructuraAlbum();
             baseDatosFotos[albumActivo][hojaActual][posicionKey].text = valor;
-            localStorage.setItem('bd_album_familiar_quezada', JSON.stringify(baseDatosFotos));
+            
+            // Subir el texto en tiempo real a Firebase
+            subirCambioFirebase(albumActivo, hojaActual, posicionKey, 'text', valor);
         }
     </script>
 </body>
