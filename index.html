@@ -242,7 +242,7 @@
             border-radius: 6px;
         }
 
-        /* CONTENEDOR PRINCIPAL DEL ÁLBUM: ADAPTATIVO */
+        /* CONTENEDOR PRINCIPAL DEL ÁLBUM */
         .album-area {
             display: none;
             width: 100%;
@@ -263,7 +263,6 @@
             flex-direction: column;
         }
         
-        /* El wrapper mantiene aspecto cuadrado solo si no es el álbum general */
         .libro-wrapper:not(.modo-general) {
             aspect-ratio: 1 / 1;
         }
@@ -392,6 +391,22 @@
             font-size: 12px;
             color: #8c7355;
             font-weight: bold;
+        }
+
+        /* TEXTO DE CARGA INDIVIDUAL */
+        .texto-cargando {
+            font-size: 13px;
+            color: #6c4724;
+            font-weight: bold;
+            animation: parpadeo 1.5s infinite;
+            display: none;
+            text-align: center;
+        }
+
+        @keyframes parpadeo {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
         }
 
         /* INTERFAZ SELECTOR CÁMARA/GALERÍA */
@@ -529,7 +544,7 @@
         .hidden { display: none !important; }
         input[type="file"] { display: none; }
 
-        /* VISOR MODAL PARA ZOOM DE FOTOS CON BOTONES DE AVANCE CONTINUO */
+        /* VISOR MODAL PARA ZOOM DE FOTOS */
         .modal-zoom {
             display: none;
             position: fixed;
@@ -667,7 +682,7 @@
         </div>
     </div>
 
-    <!-- VISOR EN ZOOM MEJORADO CON SEGUIDOR Y FLECHAS DE AVANCE CONTINUO -->
+    <!-- VISOR EN ZOOM CON SEGUIDOR -->
     <div id="modalZoom" class="modal-zoom">
         <span class="close-zoom" onclick="cerrarZoom()">&times;</span>
         <button class="flecha-zoom izq" onclick="cambiarFotoZoom(-1)">←</button>
@@ -677,7 +692,6 @@
     </div>
 
     <script>
-        // URL DE ENLACE DIRECTO A TU FIREBASE REALTIME DATABASE
         const URL_FIREBASE = "https://albumquezada-default-rtdb.firebaseio.com/";
 
         const cuentasDefecto = {
@@ -696,7 +710,6 @@
         const totalHojas = 1002; 
         let baseDatosFotos = {};
 
-        // Variables para controlar el carrusel continuo dentro del zoom
         let listaFotosCarrusel = [];
         let indiceCarruselActual = -1;
 
@@ -738,6 +751,7 @@
                 });
             } catch (error) {
                 console.error("Error al subir dato a Firebase:", error);
+                alert("Hubo un error de conexión al subir la foto a internet. Por favor, vuelve a intentarlo.");
             }
         }
 
@@ -797,7 +811,7 @@
             contenedor.innerHTML = ""; 
 
             if (usuarioLogueado.rol === 'admin') {
-                mensaje.innerText = `Panel del Administrador`;
+                mensaje.innerText = `Panel del Administrator`;
                 
                 for (let id in bdCuentas) {
                     if (bdCuentas[id].rol !== 'admin') {
@@ -949,7 +963,7 @@
             hojaActual = 0;
             
             await descargarDatosFirebase();
-            construirEstructuraCarrusel(); // Compilar el índice global de fotos para las flechas del Zoom
+            construirEstructuraCarrusel(); 
             navegar(0);
         }
 
@@ -1001,7 +1015,6 @@
             navegar(0);
         }
 
-        // --- RENDERIZADO ÁLBUM INDIVIDUAL ---
         function renderizarAlbumIndividual() {
             const contenedor = document.getElementById('hojaFotos');
             
@@ -1017,15 +1030,16 @@
                     <div class="foto-placeholder" id="label-f1" onclick="${esDueno ? "abrirMenuSelector('menu-f1')" : ""}" style="${data.fotoArriba && data.fotoArriba.img ? 'display:none;' : 'display:flex;'}">
                         <span>${esDueno ? '📷 Toca para añadir foto superior' : '🔒 Sin fotografía cargada'}</span>
                     </div>
+                    <div id="cargando-f1" class="texto-cargando">⏳ Cargando foto, por favor espera...</div>
                     ${esDueno ? `
                     <div id="menu-f1" class="menu-selector-interno hidden">
                         <div class="opcion-circulo" onclick="document.getElementById('cam-input-f1').click()">
                             <div class="circulo-icono camara">📸</div><label>Cámara</label>
-                            <input type="file" id="cam-input-f1" accept="image/*" capture="environment" onchange="procesarYComprimirFoto(this, 'img-f1', 'label-f1', 'menu-f1', 'fotoArriba')">
+                            <input type="file" id="cam-input-f1" accept="image/*" capture="environment" onchange="procesarYComprimirFoto(this, 'img-f1', 'label-f1', 'menu-f1', 'fotoArriba', 'cargando-f1')">
                         </div>
                         <div class="opcion-circulo" onclick="document.getElementById('gal-input-f1').click()">
                             <div class="circulo-icono galeria">🖼️</div><label>Galería</label>
-                            <input type="file" id="gal-input-f1" accept="image/*" onchange="procesarYComprimirFoto(this, 'img-f1', 'label-f1', 'menu-f1', 'fotoArriba')">
+                            <input type="file" id="gal-input-f1" accept="image/*" onchange="procesarYComprimirFoto(this, 'img-f1', 'label-f1', 'menu-f1', 'fotoArriba', 'cargando-f1')">
                         </div>
                     </div>` : ''}
                     <img id="img-f1" class="preview-img" src="${(data.fotoArriba && data.fotoArriba.img) || ''}" style="${data.fotoArriba && data.fotoArriba.img ? 'display:block;' : 'display:none;'}" onclick="abrirZoomImagen('${(data.fotoArriba && data.fotoArriba.img) || ''}')">
@@ -1036,15 +1050,16 @@
                     <div class="foto-placeholder" id="label-f2" onclick="${esDueno ? "abrirMenuSelector('menu-f2')" : ""}" style="${data.fotoAbajo && data.fotoAbajo.img ? 'display:none;' : 'display:flex;'}">
                         <span>${esDueno ? '📷 Toca para añadir foto inferior' : '🔒 Sin fotografía cargada'}</span>
                     </div>
+                    <div id="cargando-f2" class="texto-cargando">⏳ Cargando foto, por favor espera...</div>
                     ${esDueno ? `
                     <div id="menu-f2" class="menu-selector-interno hidden">
                         <div class="opcion-circulo" onclick="document.getElementById('cam-input-f2').click()">
                             <div class="circulo-icono camara">📸</div><label>Cámara</label>
-                            <input type="file" id="cam-input-f2" accept="image/*" capture="environment" onchange="procesarYComprimirFoto(this, 'img-f2', 'label-f2', 'menu-f2', 'fotoAbajo')">
+                            <input type="file" id="cam-input-f2" accept="image/*" capture="environment" onchange="procesarYComprimirFoto(this, 'img-f2', 'label-f2', 'menu-f2', 'fotoAbajo', 'cargando-f2')">
                         </div>
                         <div class="opcion-circulo" onclick="document.getElementById('gal-input-f2').click()">
                             <div class="circulo-icono galeria">🖼️</div><label>Galería</label>
-                            <input type="file" id="gal-input-f2" accept="image/*" onchange="procesarYComprimirFoto(this, 'img-f2', 'label-f2', 'menu-f2', 'fotoAbajo')">
+                            <input type="file" id="gal-input-f2" accept="image/*" onchange="procesarYComprimirFoto(this, 'img-f2', 'label-f2', 'menu-f2', 'fotoAbajo', 'cargando-f2')">
                         </div>
                     </div>` : ''}
                     <img id="img-f2" class="preview-img" src="${(data.fotoAbajo && data.fotoAbajo.img) || ''}" style="${data.fotoAbajo && data.fotoAbajo.img ? 'display:block;' : 'display:none;'}" onclick="abrirZoomImagen('${(data.fotoAbajo && data.fotoAbajo.img) || ''}')">
@@ -1053,7 +1068,6 @@
             `;
         }
 
-        // --- RENDERIZADO ÁLBUM GENERAL ---
         function renderizarAlbumGeneral() {
             const contenedor = document.getElementById('hojaFotos');
             contenedor.innerHTML = ""; 
@@ -1103,12 +1117,10 @@
             }
         }
 
-        // --- SISTEMA INTERACTIVO DE DIAPOSITIVAS / CARRUSEL PARA EL ZOOM ---
         function construirEstructuraCarrusel() {
             listaFotosCarrusel = []; 
             
             if (albumActivo === "GENERAL") {
-                // El carrusel recopila las fotos de todos los familiares de forma cronológica por página
                 for (let h = 2; h < totalHojas; h++) {
                     for (let id in bdCuentas) {
                         const alb = bdCuentas[id].album;
@@ -1126,7 +1138,6 @@
                     }
                 }
             } else {
-                // El carrusel recopila de manera continua solo las fotos de este álbum personal
                 for (let h = 2; h < totalHojas; h++) {
                     if (baseDatosFotos[albumActivo] && baseDatosFotos[albumActivo][h]) {
                         const nodo = baseDatosFotos[albumActivo][h];
@@ -1143,20 +1154,14 @@
 
         function abrirZoomImagen(srcBase64) {
             if (!srcBase64) return;
-            
-            // Re-construir dinámicamente por si agregaron fotos nuevas justo antes
             construirEstructuraCarrusel();
-            
-            // Buscar en qué posición del carrusel está la foto cliqueada
             indiceCarruselActual = listaFotosCarrusel.findIndex(f => f.img === srcBase64);
-            
             document.getElementById('modalZoom').style.display = "flex";
             actualizarVistaZoom();
         }
 
         function actualizarVistaZoom() {
             if (indiceCarruselActual === -1 || listaFotosCarrusel.length === 0) {
-                // Respaldo por si se abre una imagen huérfana
                 document.getElementById('textoPieZoom').innerText = "";
                 return;
             }
@@ -1172,13 +1177,9 @@
 
         function cambiarFotoZoom(direccion) {
             if (listaFotosCarrusel.length === 0) return;
-            
             indiceCarruselActual += direccion;
-            
-            // Ciclo continuo infinito (si llega al final, regresa a la primera, y viceversa)
             if (indiceCarruselActual < 0) indiceCarruselActual = listaFotosCarrusel.length - 1;
             if (indiceCarruselActual >= listaFotosCarrusel.length) indiceCarruselActual = 0;
-            
             actualizarVistaZoom();
         }
 
@@ -1198,48 +1199,76 @@
             }
         }
 
-        function procesarYComprimirFoto(input, imgId, labelId, menuId, posicionKey) {
+        function procesarYComprimirFoto(input, imgId, labelId, menuId, posicionKey, cargandoId) {
             const file = input.files[0];
             if (!file) {
                 document.getElementById(menuId).classList.add('hidden');
                 return;
             }
 
+            // Ocultar botón de añadir, menú y mostrar texto de "Cargando..."
+            document.getElementById(labelId).style.display = "none";
+            document.getElementById(menuId).classList.add('hidden');
+            const elCargando = document.getElementById(cargandoId);
+            elCargando.style.display = "block";
+
             const reader = new FileReader();
+            
+            reader.onerror = function() {
+                alert("⚠️ ERROR: El navegador no pudo leer el archivo físico. Inténtalo de nuevo con otra foto o una captura de pantalla.");
+                elCargando.style.display = "none";
+                document.getElementById(labelId).style.display = "flex";
+            };
+
             reader.onload = function(e) {
                 const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    const max_size = 500; 
+                
+                img.onerror = function() {
+                    alert("⚠️ ALERTA FORMATO: El celular está usando un formato incompatible (como HEIC de alta eficiencia) o la imagen está corrupta. Intenta subiendo una captura de pantalla para confirmar.");
+                    elCargando.style.display = "none";
+                    document.getElementById(labelId).style.display = "flex";
+                };
 
-                    if (width > height) {
-                        if (width > max_size) { height *= max_size / width; width = max_size; }
-                    } else {
-                        if (height > max_size) { height *= max_size / height; width = max_size; }
+                img.onload = async function() {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const max_size = 500; 
+
+                        if (width > height) {
+                            if (width > max_size) { height *= max_size / width; width = max_size; }
+                        } else {
+                            if (height > max_size) { height *= max_size / height; width = max_size; }
+                        }
+
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const base64Optimizado = canvas.toDataURL('image/jpeg', 0.6);
+                        
+                        if (!base64Optimizado || base64Optimizado === "data:,") {
+                            throw new Error("El navegador web del móvil se quedó sin memoria para procesar esta foto.");
+                        }
+
+                        asegurarEstructuraAlbum();
+                        baseDatosFotos[albumActivo][hojaActual][posicionKey].img = base64Optimizado;
+                        
+                        // Sincronizar a Firebase
+                        await subirCambioFirebase(albumActivo, hojaActual, posicionKey, 'img', base64Optimizado);
+
+                        const imgEl = document.getElementById(imgId);
+                        imgEl.src = base64Optimizado;
+                        imgEl.style.display = "block";
+                        
+                        construirEstructuraCarrusel();
+                    } catch (error) {
+                        alert("⚠️ ERROR DE PROCESAMIENTO: " + error.message + "\n\nSugerencia: Cierra pestañas del navegador o intenta con otra foto tomada desde más lejos.");
+                        document.getElementById(labelId).style.display = "flex";
+                    } finally {
+                        elCargando.style.display = "none";
                     }
-
-                    canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    const base64Optimizado = canvas.toDataURL('image/jpeg', 0.6);
-                    asegurarEstructuraAlbum();
-                    
-                    baseDatosFotos[albumActivo][hojaActual][posicionKey].img = base64Optimizado;
-                    
-                    subirCambioFirebase(albumActivo, hojaActual, posicionKey, 'img', base64Optimizado);
-
-                    const imgEl = document.getElementById(imgId);
-                    const labelEl = document.getElementById(labelId);
-                    imgEl.src = base64Optimizado;
-                    imgEl.style.display = "block";
-                    labelEl.style.display = "none";
-                    document.getElementById(menuId).classList.add('hidden');
-                    
-                    // Actualizar el orden de las diapositivas
-                    construirEstructuraCarrusel();
                 };
                 img.src = e.target.result;
             };
