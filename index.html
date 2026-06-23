@@ -242,7 +242,7 @@
             border-radius: 6px;
         }
 
-        /* CONTENEDOR PRINCIPAL DEL ÁLBUM: CUADRADO PERFECTO */
+        /* CONTENEDOR PRINCIPAL DEL ÁLBUM: ADAPTATIVO */
         .album-area {
             display: none;
             width: 100%;
@@ -259,9 +259,13 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             border: 4px solid #362211;
             box-sizing: border-box;
-            aspect-ratio: 1 / 1; 
             display: flex;
             flex-direction: column;
+        }
+        
+        /* El wrapper mantiene aspecto cuadrado solo si no es el álbum general */
+        .libro-wrapper:not(.modo-general) {
+            aspect-ratio: 1 / 1;
         }
 
         .libro {
@@ -271,10 +275,11 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow-y: auto;
             padding: 15px;
             box-sizing: border-box;
             justify-content: space-between;
+            min-height: 350px;
         }
 
         /* PORTADA Y DEDICATORIA */
@@ -285,6 +290,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            margin: auto 0;
         }
 
         .titulo-portada {
@@ -327,15 +333,33 @@
 
         /* CUADRÍCULA DE FOTOS */
         .fotos-grid {
-            height: 100%;
+            width: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            gap: 12px;
+            gap: 15px;
+        }
+
+        /* CONTENEDOR MULTI-ÁLBUM EN MODO GENERAL */
+        .bloque-album-comun {
+            border: 2px solid #c8b9a6;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: #fffaf5;
+            margin-bottom: 15px;
+        }
+        .bloque-album-comun h4 {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            color: #6c4724;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e3d5ca;
+            padding-bottom: 3px;
+            letter-spacing: 0.5px;
         }
 
         .foto-container {
-            flex: 1;
+            width: 100%;
+            height: 180px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -344,7 +368,7 @@
             background-color: #faf8f5;
             border-radius: 6px;
             position: relative;
-            padding: 8px;
+            padding: 6px;
             box-sizing: border-box;
             overflow: hidden;
         }
@@ -365,7 +389,7 @@
         }
 
         .foto-placeholder span {
-            font-size: 13px;
+            font-size: 12px;
             color: #8c7355;
             font-weight: bold;
         }
@@ -394,15 +418,15 @@
         }
 
         .circulo-icono {
-            width: 56px;
-            height: 56px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background-color: #6c4724;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            font-size: 24px;
+            font-size: 22px;
             color: white;
             transition: transform 0.2s;
         }
@@ -417,14 +441,14 @@
             max-height: 80%;
             object-fit: contain; 
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            border: 4px solid white;
+            border: 3px solid white;
             box-sizing: border-box;
             display: none;
             cursor: pointer;
         }
 
         .pie-foto-input {
-            width: 90%;
+            width: 95%;
             margin-top: 5px;
             border: none;
             border-bottom: 1px dashed #bbaaa0;
@@ -442,7 +466,8 @@
             font-size: 11px;
             color: #a6927d;
             font-weight: bold;
-            margin-top: 5px;
+            margin-top: 10px;
+            width: 100%;
         }
 
         /* CONTROLES NAVEGACIÓN Y BUSCADOR */
@@ -536,7 +561,6 @@
         <p id="subtituloApp">Un legado de amor para toda la familia</p>
     </header>
 
-    <!-- 1. FORMULARIO DE ACCESO -->
     <div id="pantallaLogin" class="tarjeta-login">
         <p style="color:#8c7355; font-style:italic; font-size:13px; margin:0 0 20px 0;">Ingresa tu usuario asignado</p>
         <input type="text" id="usuarioInput" class="campo-input" placeholder="Usuario">
@@ -549,7 +573,6 @@
         <button class="btn-ingresar" id="btnClickIngresar" onclick="autenticarUsuario()">Iniciar Sesión</button>
     </div>
 
-    <!-- 2. PANEL DINÁMICO ADAPTATIVO -->
     <div id="panelAdmin" class="panel-dashboard">
         <div class="encabezado-panel">
             <span id="mensajePanel" style="font-size:13px; font-weight:bold; color:#6c4724;"></span>
@@ -558,7 +581,6 @@
         
         <div id="contenedorTarjetas"></div>
 
-        <!-- SUBPANEL EXCLUSIVO PARA ADMINISTRADOR: GESTIÓN DE USUARIOS Y BACKUPS -->
         <div id="panelGestionClaves" class="seccion-gestion-claves hidden">
             <h4>⚙️ Administrar Usuarios y Contraseñas</h4>
             <div id="listaClavesUsuarios"></div>
@@ -572,18 +594,15 @@
         </div>
     </div>
 
-    <!-- 3. INTERFAZ INTERACTIVA DEL ÁLBUM -->
     <div id="interfazAlbum" class="album-area">
-        <div class="libro-wrapper">
+        <div class="libro-wrapper" id="wrapperLibro">
             <div class="libro">
                 
-                <!-- HOJA 0: PORTADA -->
                 <div id="hojaPortada" class="contenido-centro">
                     <div class="titulo-portada">Nuestra Familia,<br>Nuestros Recuerdos</div>
                     <div class="subtitulo-portada">Un viaje a través de los momentos más bellos.</div>
                 </div>
 
-                <!-- HOJA 1: DEDICATORIA -->
                 <div id="hojaDedicatoria" class="contenido-centro hidden">
                     <div class="texto-dedicatoria">
                         "Este álbum lo hago con mucho cariño para mis abuelos Emma y Emilio, también dedicado a mis tíos y mis primos hermanos."
@@ -594,58 +613,12 @@
                     </div>
                 </div>
 
-                <!-- HOJAS REGISTRO DE FOTOS (HASTA 1000 HOJAS) -->
-                <div id="hojaFotos" class="fotos-grid hidden">
-                    
-                    <!-- FOTO SUPERIOR -->
-                    <div class="foto-container">
-                        <div class="foto-placeholder" id="label-f1" onclick="abrirMenuSelector('menu-f1')">
-                            <span>📷 Toca para añadir foto superior</span>
-                        </div>
-
-                        <div id="menu-f1" class="menu-selector-interno hidden">
-                            <div class="opcion-circulo" onclick="document.getElementById('cam-input-f1').click()">
-                                <div class="circulo-icono camara">📸</div><label>Cámara</label>
-                                <input type="file" id="cam-input-f1" accept="image/*" capture="environment" onchange="procesarYComprimirFoto(this, 'img-f1', 'label-f1', 'menu-f1', 'fotoArriba')">
-                            </div>
-                            <div class="opcion-circulo" onclick="document.getElementById('gal-input-f1').click()">
-                                <div class="circulo-icono galeria">🖼️</div><label>Galería</label>
-                                <input type="file" id="gal-input-f1" accept="image/*" onchange="procesarYComprimirFoto(this, 'img-f1', 'label-f1', 'menu-f1', 'fotoArriba')">
-                            </div>
-                        </div>
-                        
-                        <img id="img-f1" class="preview-img" alt="Foto Superior" onclick="manejarClickFoto('label-f1', 'img-f1')">
-                        <input type="text" class="pie-foto-input" placeholder="Escribe un recuerdo aquí..." id="pie-f1" oninput="guardarTexto('fotoArriba', this.value)">
-                    </div>
-                    
-                    <!-- FOTO INFERIOR -->
-                    <div class="foto-container">
-                        <div class="foto-placeholder" id="label-f2" onclick="abrirMenuSelector('menu-f2')">
-                            <span>📷 Toca para añadir foto inferior</span>
-                        </div>
-
-                        <div id="menu-f2" class="menu-selector-interno hidden">
-                            <div class="opcion-circulo" onclick="document.getElementById('cam-input-f2').click()">
-                                <div class="circulo-icono camara">📸</div><label>Cámara</label>
-                                <input type="file" id="cam-input-f2" accept="image/*" capture="environment" onchange="procesarYComprimirFoto(this, 'img-f2', 'label-f2', 'menu-f2', 'fotoAbajo')">
-                            </div>
-                            <div class="opcion-circulo" onclick="document.getElementById('gal-input-f2').click()">
-                                <div class="circulo-icono galeria">🖼️</div><label>Galería</label>
-                                <input type="file" id="gal-input-f2" accept="image/*" onchange="procesarYComprimirFoto(this, 'img-f2', 'label-f2', 'menu-f2', 'fotoAbajo')">
-                            </div>
-                        </div>
-                        
-                        <img id="img-f2" class="preview-img" alt="Foto Inferior" onclick="manejarClickFoto('label-f2', 'img-f2')">
-                        <input type="text" class="pie-foto-input" placeholder="Escribe un recuerdo aquí..." id="pie-f2" oninput="guardarTexto('fotoAbajo', this.value)">
-                    </div>
-
-                </div>
+                <div id="hojaFotos" class="fotos-grid hidden"></div>
 
                 <div class="nro-pagina" id="p_indicador">Portada</div>
             </div>
         </div>
 
-        <!-- BOTONES DE NAVEGACIÓN Y BUSCADOR -->
         <div class="controles">
             <button id="btnAnterior" onclick="navegar(-1)" disabled>←</button>
             
@@ -660,14 +633,12 @@
         </div>
     </div>
 
-    <!-- VENTANA MODAL PARA ZOOM DE FOTOGRAFÍAS -->
     <div id="modalZoom" class="modal-zoom" onclick="cerrarZoom()">
         <span class="close-zoom">&times;</span>
         <img id="imgModalZoomSrc" src="" alt="Zoom Recuerdo">
     </div>
 
     <script>
-        // CONFIGURACIÓN DE CUENTAS BASE DEL SISTEMA
         const cuentasDefecto = {
             'jorge': { usuario: 'jorge', clave: 'admin2026', rol: 'admin', album: 'ADMIN' },
             'fabiola': { usuario: 'fabiola', clave: 'fabi123', rol: 'familia', album: 'FABIOLA QUEZADA' },
@@ -690,7 +661,6 @@
         document.getElementById('claveInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') { autenticarUsuario(); } });
         document.getElementById('inputBuscarHoja').addEventListener('keydown', function(e) { if (e.key === 'Enter') { saltarAPagina(); } });
 
-        // FUNCIÓN PARA MOSTRAR/OCULTAR CONTRASEÑA
         function conmutarVisibilidad(idInput, boton) {
             const elInput = document.getElementById(idInput);
             if (elInput.type === "password") {
@@ -801,7 +771,6 @@
                 return;
             }
 
-            // Validar que no se repita el nombre de usuario modificado
             for(let id in bdCuentas) {
                 if(id !== idKey && bdCuentas[id].usuario.toLowerCase() === nuevoUser) {
                     alert(`El nombre de usuario "${nuevoUser}" ya existe.`);
@@ -809,7 +778,6 @@
                 }
             }
 
-            // Aplicar cambios directos sobre la clave del objeto sin perder la referencia
             bdCuentas[idKey].usuario = nuevoUser;
             bdCuentas[idKey].clave = nuevaClave;
             
@@ -819,7 +787,6 @@
             
             localStorage.setItem('bd_album_cuentas_quezada_v3', JSON.stringify(bdCuentas));
             alert("¡Cambios guardados con éxito!");
-            
             generarPanelControl();
         }
 
@@ -862,6 +829,14 @@
 
         function cargarAlbumActivo(nombreAlbum) {
             albumActivo = nombreAlbum;
+            const wrapper = document.getElementById('wrapperLibro');
+            
+            if(albumActivo === "GENERAL") {
+                wrapper.classList.add('modo-general');
+            } else {
+                wrapper.classList.remove('modo-general');
+            }
+
             document.getElementById('panelAdmin').style.display = 'none';
             document.getElementById('interfazAlbum').style.display = 'flex';
             hojaActual = 0;
@@ -884,8 +859,6 @@
             document.getElementById('hojaPortada').classList.add('hidden');
             document.getElementById('hojaDedicatoria').classList.add('hidden');
             document.getElementById('hojaFotos').classList.add('hidden');
-            document.getElementById('menu-f1').classList.add('hidden');
-            document.getElementById('menu-f2').classList.add('hidden');
 
             const indicador = document.getElementById('p_indicador');
             document.getElementById('inputBuscarHoja').value = "";
@@ -899,7 +872,12 @@
             } else {
                 document.getElementById('hojaFotos').classList.remove('hidden');
                 indicador.innerText = "Hoja " + (hojaActual - 1) + " de 1000";
-                renderizarDatosHoja();
+                
+                if (albumActivo === "GENERAL") {
+                    renderizarAlbumGeneral();
+                } else {
+                    renderizarAlbumIndividual();
+                }
             }
         }
 
@@ -913,13 +891,116 @@
             navegar(0);
         }
 
-        function manejarClickFoto(labelId, imgId) {
-            const imgEl = document.getElementById(imgId);
-            if(imgEl.src && imgEl.style.display !== "none") {
-                document.getElementById('imgModalZoomSrc').src = imgEl.src;
+        // --- RENDERIZADO DEL ÁLBUM INDIVIDUAL (O VISTA DEL ADMIN) ---
+        function renderizarAlbumIndividual() {
+            const contenedor = document.getElementById('hojaFotos');
+            
+            // Traer datos guardados o vacío por defecto
+            const data = (baseDatosFotos[albumActivo] && baseDatosFotos[albumActivo][hojaActual]) ? 
+                          baseDatosFotos[albumActivo][hojaActual] : 
+                          { fotoArriba: { img: "", text: "" }, fotoAbajo: { img: "", text: "" } };
+
+            // Determinar si quien mira puede editar (Solo el dueño del álbum puede editar, Admin solo VISUALIZA si ve el de otros)
+            const esDueno = (usuarioLogueado.album === albumActivo);
+            const deshabilitarInput = esDueno ? "" : "disabled style='border-bottom:none; font-weight:bold;'";
+
+            contenedor.innerHTML = `
+                <div class="foto-container">
+                    <div class="foto-placeholder" id="label-f1" onclick="${esDueno ? "abrirMenuSelector('menu-f1')" : ""}" style="${data.fotoArriba.img ? 'display:none;' : 'display:flex;'}">
+                        <span>${esDueno ? '📷 Toca para añadir foto superior' : '🔒 Sin fotografía cargada'}</span>
+                    </div>
+                    ${esDueno ? `
+                    <div id="menu-f1" class="menu-selector-interno hidden">
+                        <div class="opcion-circulo" onclick="document.getElementById('cam-input-f1').click()">
+                            <div class="circulo-icono camara">📸</div><label>Cámara</label>
+                            <input type="file" id="cam-input-f1" accept="image/*" capture="environment" onchange="procesarYComprimirFoto(this, 'img-f1', 'label-f1', 'menu-f1', 'fotoArriba')">
+                        </div>
+                        <div class="opcion-circulo" onclick="document.getElementById('gal-input-f1').click()">
+                            <div class="circulo-icono galeria">🖼️</div><label>Galería</label>
+                            <input type="file" id="gal-input-f1" accept="image/*" onchange="procesarYComprimirFoto(this, 'img-f1', 'label-f1', 'menu-f1', 'fotoArriba')">
+                        </div>
+                    </div>` : ''}
+                    <img id="img-f1" class="preview-img" src="${data.fotoArriba.img || ''}" style="${data.fotoArriba.img ? 'display:block;' : 'display:none;'}" onclick="abrirZoomImagen('${data.fotoArriba.img || ''}')">
+                    <input type="text" class="pie-foto-input" placeholder="${esDueno ? 'Escribe un recuerdo aquí...' : ''}" id="pie-f1" value="${data.fotoArriba.text || ''}" oninput="guardarTexto('fotoArriba', this.value)" ${deshabilitarInput}>
+                </div>
+                
+                <div class="foto-container">
+                    <div class="foto-placeholder" id="label-f2" onclick="${esDueno ? "abrirMenuSelector('menu-f2')" : ""}" style="${data.fotoAbajo.img ? 'display:none;' : 'display:flex;'}">
+                        <span>${esDueno ? '📷 Toca para añadir foto inferior' : '🔒 Sin fotografía cargada'}</span>
+                    </div>
+                    ${esDueno ? `
+                    <div id="menu-f2" class="menu-selector-interno hidden">
+                        <div class="opcion-circulo" onclick="document.getElementById('cam-input-f2').click()">
+                            <div class="circulo-icono camara">📸</div><label>Cámara</label>
+                            <input type="file" id="cam-input-f2" accept="image/*" capture="environment" onchange="procesarYComprimirFoto(this, 'img-f2', 'label-f2', 'menu-f2', 'fotoAbajo')">
+                        </div>
+                        <div class="opcion-circulo" onclick="document.getElementById('gal-input-f2').click()">
+                            <div class="circulo-icono galeria">🖼️</div><label>Galería</label>
+                            <input type="file" id="gal-input-f2" accept="image/*" onchange="procesarYComprimirFoto(this, 'img-f2', 'label-f2', 'menu-f2', 'fotoAbajo')">
+                        </div>
+                    </div>` : ''}
+                    <img id="img-f2" class="preview-img" src="${data.fotoAbajo.img || ''}" style="${data.fotoAbajo.img ? 'display:block;' : 'display:none;'}" onclick="abrirZoomImagen('${data.fotoAbajo.img || ''}')">
+                    <input type="text" class="pie-foto-input" placeholder="${esDueno ? 'Escribe un recuerdo aquí...' : ''}" id="pie-f2" value="${data.fotoAbajo.text || ''}" oninput="guardarTexto('fotoAbajo', this.value)" ${deshabilitarInput}>
+                </div>
+            `;
+        }
+
+        // --- REGLA 2: COMPILACIÓN VISUAL AUTOMÁTICA EN ÁLBUM GENERAL ---
+        function renderizarAlbumGeneral() {
+            const contenedor = document.getElementById('hojaFotos');
+            contenedor.innerHTML = ""; // Limpiar hoja
+
+            let totalRecuerdosEncontrados = 0;
+
+            // Recorrer las cuentas de todos los miembros de la familia
+            for (let id in bdCuentas) {
+                const nombreAlbumFamiliar = bdCuentas[id].album;
+                if (bdCuentas[id].rol === 'admin' || !nombreAlbumFamiliar) continue;
+
+                // Extraer lo guardado para este miembro en esta misma hoja precisa
+                const datosMiembro = (baseDatosFotos[nombreAlbumFamiliar] && baseDatosFotos[nombreAlbumFamiliar][hojaActual]) ? 
+                                      baseDatosFotos[nombreAlbumFamiliar][hojaActual] : null;
+
+                const tieneArriba = datosMiembro && datosMiembro.fotoArriba && datosMiembro.fotoArriba.img;
+                const tieneAbajo = datosMiembro && datosMiembro.fotoAbajo && datosMiembro.fotoAbajo.img;
+
+                if (tieneArriba || tieneAbajo) {
+                    totalRecuerdosEncontrados++;
+
+                    let htmlBloque = `<div class="bloque-album-comun"><h4>📖 Álbum de ${bdCuentas[id].usuario.toUpperCase()}</h4><div style="display:flex; flex-direction:column; gap:10px;">`;
+
+                    if (tieneArriba) {
+                        htmlBloque += `
+                            <div class="foto-container">
+                                <img class="preview-img" src="${datosMiembro.fotoArriba.img}" style="display:block;" onclick="abrirZoomImagen('${datosMiembro.fotoArriba.img}')">
+                                <input type="text" class="pie-foto-input" value="${datosMiembro.fotoArriba.text || '(Sin comentario)'}" disabled style="border-bottom:none; font-weight:bold;">
+                            </div>`;
+                    }
+                    if (tieneAbajo) {
+                        htmlBloque += `
+                            <div class="foto-container">
+                                <img class="preview-img" src="${datosMiembro.fotoAbajo.img}" style="display:block;" onclick="abrirZoomImagen('${datosMiembro.fotoAbajo.img}')">
+                                <input type="text" class="pie-foto-input" value="${datosMiembro.fotoAbajo.text || '(Sin comentario)'}" disabled style="border-bottom:none; font-weight:bold;">
+                            </div>`;
+                    }
+
+                    htmlBloque += `</div></div>`;
+                    contenedor.innerHTML += htmlBloque;
+                }
+            }
+
+            if (totalRecuerdosEncontrados === 0) {
+                contenedor.innerHTML = `
+                    <div style="text-align:center; padding: 40px 10px; color:#8c7355; font-style:italic; font-size:13px;">
+                        👥 Ningún familiar ha subido fotos en la Hoja ${hojaActual - 1} todavía.
+                    </div>`;
+            }
+        }
+
+        function abrirZoomImagen(srcBase64) {
+            if(srcBase64) {
+                document.getElementById('imgModalZoomSrc').src = srcBase64;
                 document.getElementById('modalZoom').style.display = "flex";
-            } else {
-                cambiarFoto(labelId, imgId);
             }
         }
 
@@ -980,51 +1061,10 @@
             input.value = ""; 
         }
 
-        function cambiarFoto(labelId, imgId) {
-            const imgEl = document.getElementById(imgId);
-            if (imgEl.src && imgEl.style.display === "block") {
-                if(!confirm("¿Deseas cambiar esta foto por otra nueva?")) return;
-            }
-            imgEl.style.display = "none";
-            document.getElementById(labelId).style.display = "flex";
-        }
-
         function guardarTexto(posicionKey, valor) {
             asegurarEstructuraAlbum();
             baseDatosFotos[albumActivo][hojaActual][posicionKey].text = valor;
             localStorage.setItem('bd_album_familiar_quezada', JSON.stringify(baseDatosFotos));
-        }
-
-        function renderizarDatosHoja() {
-            const data = (baseDatosFotos[albumActivo] && baseDatosFotos[albumActivo][hojaActual]) ? 
-                          baseDatosFotos[albumActivo][hojaActual] : 
-                          { fotoArriba: { img: "", text: "" }, fotoAbajo: { img: "", text: "" } };
-            
-            const img1 = document.getElementById('img-f1');
-            const label1 = document.getElementById('label-f1');
-            const pie1 = document.getElementById('pie-f1');
-            
-            if(data.fotoArriba.img) {
-                img1.src = data.fotoArriba.img;
-                img1.style.display = "block";
-                label1.style.display = "none";
-            } else {
-                img1.src = ""; img1.style.display = "none"; label1.style.display = "flex";
-            }
-            pie1.value = data.fotoArriba.text || "";
-
-            const img2 = document.getElementById('img-f2');
-            const label2 = document.getElementById('label-f2');
-            const pie2 = document.getElementById('pie-f2');
-
-            if(data.fotoAbajo.img) {
-                img2.src = data.fotoAbajo.img;
-                img2.style.display = "block";
-                label2.style.display = "none";
-            } else {
-                img2.src = ""; img2.style.display = "none"; label2.style.display = "flex";
-            }
-            pie2.value = data.fotoAbajo.text || "";
         }
     </script>
 </body>
